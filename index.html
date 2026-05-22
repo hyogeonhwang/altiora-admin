@@ -502,6 +502,13 @@ function delNoticeInline(ni) {
   fbSave("notices", arr);
 }
 
+function resetMessages() {
+  showConfirm("메시지 템플릿을 기본값으로 복원할까요?<br>현재 작성된 템플릿이 모두 교체됩니다.", function() {
+    S.d.messages = JSON.parse(JSON.stringify(DEF.messages));
+    fbSave("messages", S.d.messages);
+  });
+}
+
 function showOfflineBanner() {
   // 조용히 localStorage만 사용
 }
