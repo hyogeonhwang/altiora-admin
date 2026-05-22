@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>알티오라 위례 · 행정 업무 가이드</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;background:#f4f6f4;color:#1a1a1a;font-size:14px}
+.app{max-width:960px;margin:0 auto}
+.header{background:#fff;border-bottom:1px solid #dde8dd;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.hd-top{display:flex;align-items:center;gap:10px;padding:12px 0 6px}
+.dot{width:9px;height:9px;border-radius:50%;background:#1D9E75}
+.brand{font-size:13px;font-weight:700;color:#0F6E56}
+.brand-sub{font-size:12px;color:#999;flex:1}
+.edit-btn{padding:5px 14px;font-size:12px;font-weight:600;border-radius:20px;border:1px solid #ddd;background:transparent;cursor:pointer;font-family:inherit;color:#666;transition:all .15s}
+.edit-btn.active{background:#FAEEDA;color:#854F0B;border-color:#EF9F27}
+.tabs{display:flex;overflow-x:auto}
+.tab{padding:8px 13px;font-size:13px;color:#777;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit}
+.tab.active{color:#0F6E56;border-bottom-color:#1D9E75;font-weight:600}
+.tab:hover:not(.active){color:#333}
+.content{padding:20px;min-height:calc(100vh - 90px)}
+.card{background:#fff;border-radius:12px;border:1px solid #e4e4e4;padding:16px}
+.slbl{font-size:11px;font-weight:700;color:#999;letter-spacing:.06em;margin-bottom:8px;text-transform:uppercase}
+.stit{font-size:16px;font-weight:700;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.al{padding:11px 14px;border-radius:9px;font-size:12px;line-height:1.75}
+.al-t{background:#E1F5EE;border:1px solid #5DCAA5;color:#0F6E56}
+.al-b{background:#E6F1FB;border:1px solid #85B7EB;color:#185FA5}
+.al-a{background:#FAEEDA;border:1px solid #EF9F27;color:#854F0B}
+.al-r{background:#FCEBEB;border:1px solid #f0a0a0;color:#A32D2D}
+.sflow{display:flex;flex-direction:column}
+.sitem{display:flex;gap:12px;align-items:stretch;position:relative}
+.sbody{flex:1;padding:10px 14px;background:#fff;border-radius:10px;border:1px solid #e8e8e8;margin-bottom:8px}
+.sbody.sm{padding:8px 12px;border-radius:8px;margin-bottom:6px}
+.step-title{font-size:13px;font-weight:700}
+.step-desc{font-size:12px;color:#666;margin-top:3px;white-space:pre-line;line-height:1.7}
+.segs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.seg{padding:5px 14px;font-size:12px;border:1px solid #ddd;border-radius:20px;cursor:pointer;background:transparent;color:#666;font-family:inherit}
+.seg.active{background:#E1F5EE;color:#0F6E56;border-color:#5DCAA5;font-weight:600}
+.ci{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:8px;border:1px solid #e8e8e8;cursor:pointer;background:#fff;margin-bottom:4px;position:relative}
+.ci:hover{border-color:#5DCAA5}.ci.done{background:#E1F5EE;border-color:#5DCAA5}
+.cb{width:17px;height:17px;border-radius:4px;border:1.5px solid #ccc;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:700}
+.cb.done{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.ctxt{font-size:13px;line-height:1.5;flex:1}
+.ctxt.done{text-decoration:line-through;opacity:.7;color:#0F6E56}
+.pbar{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+.pfill{height:100%;border-radius:3px}
+.achdr{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;border-radius:12px;background:#f9f9f9;border:1px solid #e8e8e8;margin-bottom:2px}
+.achdr:hover{background:#f0f0f0}
+.abody{background:#fff;border:1px solid #e8e8e8;border-top:none;border-radius:0 0 12px 12px;padding:4px 16px 12px}
+.rrow{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;align-items:flex-start;position:relative}
+.rrow:last-child{border-bottom:none}
+.rlbl{font-size:12px;color:#999;min-width:120px;flex-shrink:0;padding-top:2px}
+.rval{font-size:12px;color:#1a1a1a;line-height:1.6;flex:1;display:flex;flex-direction:column;gap:4px}
+.rlink{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;background:#E1F5EE;color:#0F6E56;text-decoration:none;border:1px solid #5DCAA5;align-self:flex-start}
+.rlink:hover{background:#9FE1CB}
+.chcard{border-radius:10px;padding:13px;border:1px solid rgba(0,0,0,.07);text-align:center;position:relative}
+.rline{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;margin-bottom:5px;position:relative}
+.btn{padding:6px 13px;font-size:12px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;color:#555;font-family:inherit;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{background:#f5f5f5}
+.itbl{width:100%;font-size:13px;border-collapse:collapse}
+.itbl td{padding:9px 10px;border-bottom:1px solid #f2f2f2;vertical-align:top}
+.itbl td:first-child{color:#888;font-size:12px;width:140px;white-space:nowrap}
+.itbl tr:last-child td{border-bottom:none}
+.arrdn{text-align:center;color:#ccc;font-size:18px;margin:3px 0}
+.dv{height:1px;background:#f0f0f0;margin:14px 0}
+.mc{background:#fff;border:1px solid #e4e4e4;border-radius:12px;margin-bottom:12px;overflow:hidden;position:relative}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:#f9faf9;border-bottom:1px solid #eee;gap:10px}
+.mt{font-size:13px;font-weight:700}
+.mb{padding:14px 16px}
+.mtxt{font-size:12px;line-height:1.9;white-space:pre-wrap;background:#fafafa;border:1px solid #ebebeb;border-radius:8px;padding:12px 14px;margin-bottom:8px;font-family:-apple-system,'Malgun Gothic',sans-serif}
+.mnote{font-size:11px;color:#999;line-height:1.6}
+.cpybtn{padding:6px 14px;font-size:12px;font-weight:600;border-radius:6px;border:none;background:#1D9E75;color:#fff;cursor:pointer;font-family:inherit;flex-shrink:0}
+.cpybtn:hover{background:#0F6E56}
+.cpybtn.ok{background:#185FA5}
+/* Edit mode styles */
+.edit-ctrl{display:none;align-items:center;gap:4px;flex-shrink:0}
+.edit-mode .edit-ctrl{display:flex}
+.eic{width:24px;height:24px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:#666;flex-shrink:0}
+.eic:hover{background:#f5f5f5}
+.eic.del:hover{background:#FCEBEB;border-color:#f0a0a0;color:#A32D2D}
+.add-btn{display:none;width:100%;padding:8px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:1px dashed #5DCAA5;border-radius:8px;cursor:pointer;text-align:center;font-family:inherit;margin-top:6px}
+.edit-mode .add-btn{display:block}
+.add-btn:hover{background:#9FE1CB}
+/* Home routine columns */
+.routine-col{background:#fff;border-radius:12px;border:1px solid #e4e4e4;overflow:hidden}
+.routine-head{padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.08)}
+.routine-period{font-size:13px;font-weight:700}
+.routine-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.routine-item{font-size:12px;padding:8px 10px;background:#f9f9f9;border-radius:8px;border:1px solid #ebebeb;line-height:1.5;position:relative;display:flex;align-items:flex-start;gap:8px}
+.routine-item-content{flex:1}
+.routine-task{color:#1a1a1a}
+.routine-target{color:#888;font-size:11px;margin-top:2px}
+/* Modal */
+#modalOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+#modalOverlay.show{display:flex}
+#modal-box{background:#fff;border-radius:16px;padding:24px;width:520px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:18px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:12px;color:#888;margin-bottom:5px;font-weight:500}
+.modal-field input,.modal-field textarea,.modal-field select{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1a1a;background:#fff}
+.modal-field input:focus,.modal-field textarea:focus{outline:none;border-color:#5DCAA5}
+.modal-field textarea{height:140px;resize:vertical;line-height:1.7}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0}
+.modal-save{padding:8px 20px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.modal-save:hover{background:#0F6E56}
+.modal-cancel{padding:8px 20px;background:transparent;color:#666;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit}
+.modal-cancel:hover{background:#f5f5f5}
+.color-options{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s}
+.color-opt.selected{border-color:#1a1a1a;transform:scale(1.15)}
+/* Loading */
+.loading{padding:60px 20px;text-align:center;color:#888;font-size:14px}
+body,html{min-height:100%}
+.edit-banner{display:none;background:#FAEEDA;border-bottom:1px solid #EF9F27;padding:8px 20px;font-size:12px;color:#854F0B;text-align:center}
+.edit-mode-on .edit-banner{display:block}
+@media(max-width:640px){.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}.content{padding:14px}}
+@media print{.header,.segs,.btn,.cpybtn,.edit-ctrl,.add-btn,.edit-btn,.edit-banner{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="hd-top">
+      <div class="dot"></div>
+      <span class="brand">알티오라 위례</span>
+      <span class="brand-sub">행정 업무 가이드 2026</span>
+      <button class="edit-btn" id="editBtn">✏️ 편집 모드</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+  <div id="editBanner" class="edit-banner" style="display:none">✏️ 편집 모드가 활성화되어 있습니다. 항목을 수정/추가/삭제할 수 있습니다.</div>
+  <div class="content" id="content"><div class="loading">데이터 불러오는 중...</div></div>
+</div>
+
+<!-- Modal -->
+<div id="modalOverlay">
+  <div id="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div id="modalFields"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-save" onclick="saveModal()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+var firebaseConfig = {
+  apiKey: "AIzaSyAJc2wip3raI7rlTujAPO1w6VPdCd_tE68",
+  authDomain: "altiora-admin.firebaseapp.com",
+  databaseURL: "https://altiora-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "altiora-admin",
+  storageBucket: "altiora-admin.firebasestorage.app",
+  messagingSenderId: "791679734419",
+  appId: "1:791679734419:web:57945456c3f92cfb653366"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+
+var DEF = {
+routines: [
+  {period:"매일", pcolor:"#E1F5EE", ptc:"#0F6E56", pborder:"#5DCAA5", tasks:[
+    {task:"상담 채널 4종 확인 (전화/오픈채팅/네이버톡톡/당근비즈니스)", target:""}
+  ]},
+  {period:"매주 금", pcolor:"#E6F1FB", ptc:"#185FA5", pborder:"#85B7EB", tasks:[
+    {task:"환불 송금 요청", target:"4번 카톡방 (이사장님)"},
+    {task:"주간 상담 보고", target:"4번 카톡방"},
+    {task:"구글폼 시트 보고", target:"원장님 행정방"}
+  ]},
+  {period:"매월", pcolor:"#FAEEDA", ptc:"#854F0B", pborder:"#EF9F27", tasks:[
+    {task:"신규생·퇴원생 현황 + 수납 보고", target:"말일, 이사장님 4번 카톡방"},
+    {task:"큐라스픽 사용 인원 안내", target:"초, 원장님 행정방"}
+  ]}
+],
+consult: {
+  channels:[
+    {name:"전화", mgr:"담당: 이선영", desc:"감사합니다. 알티오라 위례입니다.\n(내선 469 → 페타무스)", bg:"#E6F1FB", tc:"#185FA5"},
+    {name:"오픈채팅", mgr:"담당: 이선영", desc:"안녕하세요, 알티오라 위례입니다.", bg:"#FAEEDA", tc:"#854F0B"},
+    {name:"네이버 톡톡", mgr:"원장/부원장/Grace/바다", desc:"원 핸드폰으로 확인 및 답변", bg:"#EAF3DE", tc:"#3B6D11"},
+    {name:"당근 비즈", mgr:"담당: 바다", desc:"원 핸드폰으로 답변", bg:"#FCEBEB", tc:"#A32D2D"}
+  ],
+  testReq:["유치부 6세 2년차 / 7세 2년차 / 7세 3년차","팬그램 초등부 (전원)","팬그램키즈 7A / 7B / 7C","페타무스 (전원)"],
+  testNoReq:["유치부 (위 해당자 제외)","팬그램키즈 (7A/7B/7C 제외)"],
+  testNote:"유치부: 대면 상담 / 팬그램: 대면 또는 전화",
+  testSteps:[
+    {t:"원장/부원장님과 날짜 협의 → [반배정 TEST 2026] 시트에 날짜 입력", c:"blue"},
+    {t:"교사 Timetable 확인 → 담당 교사 배정", c:"teal"},
+    {t:"전체교사방 공지 — 전날 17:00 + 당일 09:00 (총 2회, in English)", c:"purple"},
+    {t:"테스트 용지 출력: 공유파일 → 06 TEST → Test Paper", c:"gray"},
+    {t:"유치부 1일 체험수업 필요 시: 70,000원 비용 안내", c:"amber"}
+  ]
+},
+register:{
+  "유치부":[
+    {n:1,t:"통통통 항목 생성",d:"등록 전 미리 생성하면 편리",c:"teal"},
+    {n:2,t:"수납",d:"월 교습비: 신용카드 가능\n기타 비용 (첫달): 계좌이체만\n2달~: 성남사랑상품권 chak 가능",c:"blue"},
+    {n:3,t:"전체교사방 공지",d:"완납 확인 즉시 1회 (in English)\n첫 등원일 09:00 재공지 → 총 2회",c:"purple"},
+    {n:4,t:"키즈노트 초대",d:"초대반: 알티오라 위례캠퍼스\n영어이름 + 현금영수증 번호 기록",c:"teal"},
+    {n:5,t:"알림장 안내",d:"첫등원 안내문 / 원복 사이즈 신청\n바다T → 셔틀 안내 / 바다T → 급식 안내",c:"blue"},
+    {n:6,t:"물품 배부",d:"백팩+학용품2종+실내화가방 넣어서 배부\n원복: 사이즈 선택 (재고 확인 필수)\n입학선물(레디백) 함께 배부",c:"amber"},
+    {n:7,t:"등원 전날",d:"배정 반으로 키즈노트 이동",c:"purple"}
+  ],
+  "팬그램":[
+    {n:1,t:"통통통 항목 생성",d:"통통통 상담란에 초기상담 내용도 함께 입력",c:"teal"},
+    {n:2,t:"수납",d:"월 교습비: 신용카드 가능\n기타 비용 (첫달): 계좌이체만",c:"blue"},
+    {n:3,t:"전체교사방 공지",d:"완납 확인 즉시 1회 (in English)\n첫 등원일 09:00 재공지 → 총 2회",c:"purple"},
+    {n:4,t:"키즈노트 초대",d:"초대반: 2026학년도 알티오라 팬그램키즈\n영어이름 + 현금영수증 번호 기록",c:"teal"},
+    {n:5,t:"신입생 안내문 업로드",d:"반별 안내문 확인 후 알림장 업로드\n⚠️ jpg/png 파일만 가능 — PDF 불가",c:"amber"},
+    {n:6,t:"물품",d:"데스크 배부 없음\n가방은 담임교사가 첫날 직접 배부",c:"gray"},
+    {n:7,t:"등원 전날",d:"배정 반으로 키즈노트 이동",c:"purple"}
+  ],
+  "페타무스":[
+    {n:1,t:"통통통 항목 생성",d:"",c:"teal"},
+    {n:2,t:"수납",d:"월 교습비: 신용카드 가능\n기타 비용 (첫달): 계좌이체만",c:"blue"},
+    {n:3,t:"전체교사방 공지",d:"완납 확인 즉시 1회 (in English)\n첫 등원일 09:00 재공지 → 총 2회",c:"purple"},
+    {n:4,t:"키즈노트 초대",d:"초대반: 2026 Petamus International\n영어이름 + 현금영수증 번호 기록",c:"teal"},
+    {n:5,t:"⚠️ Grace T. 확인 필수",d:"Grace T.와 반드시 cross-check 후 신입생 안내문 업로드\nGrace T. 확인 없이 단독 진행 금지",c:"amber"},
+    {n:6,t:"물품",d:"1층에서 Grace T. 전담 (가방/필통/교재)\n데스크 배부 없음",c:"gray"},
+    {n:7,t:"등원 전날",d:"배정 반으로 키즈노트 이동",c:"purple"}
+  ]
+},
+checklist:{
+  "신규생_유치부":[
+    {g:"수납",items:["통통통 항목 생성","월 교습비 수납 확인 (신용카드 가능)","기타 비용 (첫달): 계좌이체만 — 2달~: 성남사랑상품권 chak 가능","통통통 회원가입 안내문자 발송"]},
+    {g:"교사 공지",items:["전체교사방 신규생 안내 (완납 즉시, in English)","첫 등원일 09:00 전체교사방 재공지 → 총 2회"]},
+    {g:"키즈노트",items:["완납 후 키즈노트 초대 → 알티오라 위례캠퍼스","영어이름 + 현금영수증 번호 기록","첫등원 안내문 알림장 발송 (담임 내용 확인 후)","원복 사이즈 신청 안내문 발송","바다T → 셔틀 등하원 장소/시간 안내","바다T → 급식 안내"]},
+    {g:"물품 준비",items:["원복 사이즈 확인 및 재고 파악","백팩 준비","학용품 2종 (색연필+사인펜) 준비","실내화 가방 준비","입학선물 레디백 준비"]},
+    {g:"등원 전날",items:["배정 반으로 키즈노트 이동"]}
+  ],
+  "신규생_팬그램":[
+    {g:"수납",items:["통통통 항목 생성","수납 완료 확인","통통통 회원가입 안내문자 발송","통통통 상담란에 초기상담 내용 입력"]},
+    {g:"교사 공지",items:["전체교사방 신규생 안내 (완납 즉시, in English)","첫 등원일 09:00 전체교사방 재공지 → 총 2회"]},
+    {g:"키즈노트",items:["완납 후 키즈노트 초대 → 2026학년도 알티오라 팬그램키즈","영어이름 + 현금영수증 번호 기록","반별 신입생 안내문 업로드 (jpg/png만 가능, PDF 불가)","바다T → 셔틀 안내 (필요시)"]},
+    {g:"물품",items:["데스크 배부 없음 — 가방은 담임교사가 첫날 직접 배부"]},
+    {g:"등원 전날",items:["배정 반으로 키즈노트 이동"]}
+  ],
+  "신규생_페타무스":[
+    {g:"수납",items:["통통통 항목 생성","수납 완료 확인","통통통 회원가입 안내문자 발송"]},
+    {g:"교사 공지",items:["전체교사방 신규생 안내 (완납 즉시, in English)","첫 등원일 09:00 전체교사방 재공지 → 총 2회"]},
+    {g:"키즈노트",items:["완납 후 키즈노트 초대 → 2026 Petamus International","영어이름 + 현금영수증 번호 기록","⚠️ Grace T.와 반드시 cross-check 후 신입생 안내문 업로드","바다T → 셔틀 안내 (필요시)"]},
+    {g:"물품",items:["1층에서 Grace T. 전담 (가방/필통/교재) — 데스크 배부 없음"]},
+    {g:"등원 전날",items:["배정 반으로 키즈노트 이동"]}
+  ],
+  "퇴원생":[
+    {g:"퇴원 확정",items:["원장님/부원장님과 퇴원 확정 확인","전체교사방에 퇴원생 퇴원일 공지 (in English)"]},
+    {g:"도서보증금 확인",items:["담임교사에게 미반납/분실 도서 유무 확인","분실 도서 권당 10,000원 차감 계산","환불 금액 최종 확정"]},
+    {g:"키즈노트",items:["퇴원 2~3일 후 월별 목록 3개월분 다운로드 저장 (공유파일→04 키즈노트 알림장(퇴소자)→반별 저장)","키즈노트 퇴소 처리"]},
+    {g:"환불 처리",items:["매주 금요일 → 4번 카톡방에 환불 송금 요청 (이사장님/Elly/Hetty/Anna)"]},
+    {g:"통통통",items:["통통통 퇴원 처리"]}
+  ],
+  "신규직원":[
+    {g:"서류 수령 (7종)",items:["① 최종학력 졸업증명서 (국문)","② 통장사본","③ 주민등록등본 (본인 개인식별번호+주소)","④ 성범죄경력 및 아동학대 전력 조회서","⑤ 아동학대 신고의무자 교육 수료증","⑥ 긴급복지 지원 신고의무자 교육 수료증","⑦ 장애인학대 신고의무자 교육 수료증","(셔틀탑승시) 어린이 통학버스 안전교육 확인증"]},
+    {g:"서류 처리",items:["데스크 뒤 캐비닛 한국인 교사 파일에 파일링","입사 후 1개월 내 이사장님께 서류 전달 (교육청 교사 신고)"]},
+    {g:"시스템 등록",items:["통통통 직원 등록 + 출퇴근 시간 입력","조직도 파일(06 조직도_직원현황_2026)에 출퇴근 시간 동일 입력","통통통 ID/PW 받아서 직원자료에 입력","이메일 주소 수령 후 조직도 파일 입력"]},
+    {g:"물품 지급",items:["알티오라 티셔츠 배부 (재고 파일 확인)","실내화 배부 — 첫 출근 1회만 (이후 개인 구입)"]},
+    {g:"원어민 교사 (해당시)",items:["이메일 주소 필수 확인 (매월 급여명세서 이메일 발송)"]}
+  ]
+},
+payment:{
+  "환불":[
+    {t:"환불 사유 및 금액 확인",d:"퇴원생 도서보증금 / 교재비 / 기타 비용\n담임교사에게 미반납/분실 도서 유무 확인",c:"blue"},
+    {t:"도서보증금 환불 금액 계산",d:"도서보증금 - (분실 수 × 10,000원) = 환불 금액\n분실 도서 명단 파일에도 기록",c:"amber"},
+    {t:"매주 금요일 → 4번 카톡방에 환불 요청",d:"이사장님/Elly/Hetty/Anna\n원생명 + 환불 금액 + 사유 명시",c:"teal"},
+    {t:"이사장님 송금 완료 확인",d:"",c:"purple"}
+  ],
+  "이엠북스":[
+    {t:"이엠북스 김상현 차장 카톡 결제 요청 수신",d:"매월 또는 격월 수신",c:"blue"},
+    {t:"Betty T. 거래명세서 파일 확인 및 cross-check",d:"교재 배송 상자 거래명세서 — Betty T. 파일링 중",c:"teal"},
+    {t:"금액 및 수량 양쪽 일치 확인",d:"김상현 차장 거래 원장 ↔ Betty T. 파일 비교\n반품 환불 금액도 함께 확인",c:"amber"},
+    {t:"교재 카톡방에 결제 요청",d:"이사장님 + Betty T. 알티오라 카톡방",c:"purple"},
+    {t:"이사장님 결제 완료 확인",d:"",c:"gray"}
+  ],
+  "원복":[
+    {t:"원복 재고 파일 확인",d:"공유파일 → 03 원복 관련 → 원복 주문&재고 현황",c:"teal"},
+    {t:"스마트아이 사이트에서 주문",d:"altiora.firstmall.kr\n하복: 4월 초 / 동복: 9월 초 키즈노트 공지 후 취합 주문",c:"blue"},
+    {t:"4번 카톡방에 결제 요청",d:"이사장님/Elly/Hetty/Anna",c:"amber"},
+    {t:"이사장님 결제 완료",d:"",c:"gray"},
+    {t:"배송 후 원복 보관",d:"부원장님 방 정면 아래 캐비닛 — 하복/동복 구분",c:"purple"},
+    {t:"재고 현황 파일 업데이트",d:"",c:"teal"}
+  ],
+  "교재반품":{
+    lnc:[
+      {t:"Betty T.가 반품 처리 후 반품서 전달",c:"teal"},
+      {t:"수량/금액 확인 후 반품서 파일링",d:"[2026학년도 교재 반품] 연두색 파일",c:"blue"},
+      {t:"1~2개월 내 러닝박스에서 반품 처리 확인",d:"learningbox.biz → Book order",c:"amber"},
+      {t:"연 1회 본사 전화 → 누적 금액 이체 요청",d:"국민은행 이체 후 이사장님께 보고",c:"purple"}
+    ],
+    emc:[
+      {t:"Betty T.가 반품 처리 후 반품서 전달",c:"teal"},
+      {t:"반품서 파일링",d:"[2026학년도 교재 반품] 연두색 파일",c:"blue"},
+      {t:"이엠북스 월 결제 요청 시 반품 금액 차감",d:"거래 원장 확인 → cross-check",c:"amber"},
+      {t:"이사장님께 차감 후 금액으로 결제 요청",c:"purple"}
+    ]
+  }
+},
+messages:{
+  "키즈노트":[
+    {title:"유치부 · 신규생 첫등원 안내",tag:"키즈노트 알림장",tc:"teal",note:"담임 교사에게 내용 확인 후 발송. 연령별·담임별 내용 상이할 수 있음.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n[원생 영어이름]([원생 한국이름]) 학부모님,\n[입학일]부터 [반이름]반 가족이 되신 것을 진심으로 환영합니다!\n\n▶ 첫 등원 준비물\n• 실내화 (가방에 넣어서 지참)\n• 물통 (이름 기재)\n• [담임 교사 확인 후 추가 안내 사항]\n\n▶ 등원 시간: [등원 시간]\n▶ 하원 시간: [하원 시간]\n\n원에서 사용할 영어 이름과 현금영수증 발급 번호를 알림장 회신으로 보내주시면 감사하겠습니다.\n\n설레는 마음으로 기다리겠습니다 🌿\n알티오라 위례 드림"},
+    {title:"유치부 · 원복 사이즈 신청",tag:"키즈노트 알림장",tc:"teal",note:"대면 등록 시 원복 사이즈를 바로 선택한 경우 발송 불필요.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n원복 사이즈 신청 안내를 드립니다.\n\n▶ 원복 종류: 상의 / 하의 / 점퍼\n▶ 사이즈: 110 / 120 / 130 / 140\n▶ 신청 방법: 알림장 회신으로 사이즈 보내주세요.\n\n원복은 신청 후 [수령 예정일]에 배부해 드릴 예정입니다.\n\n감사합니다 🌿\n알티오라 위례 드림"},
+    {title:"팬그램/팬그램키즈 · 신규생 안내 (텍스트 보조용)",tag:"키즈노트 알림장",tc:"teal",note:"⚠️ 반별 이미지 안내문(jpg/png) 업로드가 원칙. PDF 불가. 이미지 불가 시 보조용.",text:"안녕하세요, 알티오라 팬그램입니다 😊\n\n[원생 영어이름]([원생 한국이름]) 학부모님, 환영합니다!\n[등원 시작일]부터 [반이름]반에서 함께합니다.\n\n▶ 등원 시간: [등원 시간]\n▶ 하원 시간: [하원 시간]\n▶ [담임 교사 확인 후 추가 안내]\n\n가방은 첫날 담임 선생님께서 직접 배부해 드립니다.\n\n감사합니다 🌿\n알티오라 팬그램 드림"},
+    {title:"페타무스 · 신규생 안내 (기본형)",tag:"키즈노트 알림장",tc:"teal",note:"⚠️ 반드시 Grace T.와 내용 cross-check 후 발송. Grace T. 확인 없이 단독 발송 금지.",text:"안녕하세요, Petamus International입니다 😊\n\n[원생 영어이름]([원생 한국이름]) 학부모님, 환영합니다!\n[등원 시작일]부터 [반이름]반에서 함께합니다.\n\n▶ 등원 준비물 및 일정\n[Grace T. 확인 후 내용 입력]\n\n▶ 등원 시간: [등원 시간]\n▶ 하원 시간: [하원 시간]\n\n감사합니다 🌿\nPetamus International 드림"},
+    {title:"원공지 · 키즈아머 정기소독",tag:"키즈노트 원공지",tc:"blue",note:"소독일 전날 또는 당일 오전 업로드.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n정기 원내 소독 일정을 안내드립니다.\n\n▶ 소독 일시: [날짜] 오후 7시\n▶ 소독 업체: 키즈아머\n▶ 소독 범위: 원내 전체\n\n이용에 참고 부탁드립니다.\n감사합니다 🌿\n알티오라 위례 드림"},
+    {title:"원공지 · 휴원일 안내",tag:"키즈노트 원공지",tc:"blue",note:"원장님 요청 시 제작하여 공지.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n휴원 일정을 안내드립니다.\n\n▶ 휴원일: [날짜]\n▶ 재원일: [날짜]부터 정상 운영\n\n이용에 참고 부탁드립니다.\n감사합니다 🌿\n알티오라 위례 드림"}
+  ],
+  "교사방":[
+    {title:"신규생 등원 공지 (완납 즉시)",tag:"전체교사방 (in English)",tc:"purple",note:"완납 확인 직후 즉시 발송. 첫 등원일 09:00에 재공지 (총 2회).",text:"Dear teachers,\n\nWe have a new student joining us.\n\n▶ Student: [English Name] ([Korean Name])\n▶ Class: [Class Name]\n▶ Start Date: [Date]\n\nPlease give them a warm welcome!\nThank you 😊"},
+    {title:"신규생 등원 공지 (첫 등원일 09:00)",tag:"전체교사방 (in English)",tc:"purple",note:"첫 등원일 오전 09:00에 발송하는 2차 공지.",text:"Good morning, everyone!\n\nJust a reminder that our new student [English Name] ([Korean Name]) is joining [Class Name] today.\n\nPlease welcome them warmly!\nThank you 😊"},
+    {title:"퇴원생 공지",tag:"전체교사방 (in English)",tc:"purple",note:"원장님/부원장님과 퇴원 확정 후 발송.",text:"Dear teachers,\n\nPlease be informed that [English Name] ([Korean Name]) from [Class Name] will be leaving us on [Date].\n\nThank you for the wonderful time with them.\nWe wish them all the best! 🌿"},
+    {title:"반배정 테스트 공지 (전날 17:00)",tag:"전체교사방 (in English)",tc:"purple",note:"테스트 전날 오후 5:10 발송 (1차 공지).",text:"Dear teachers,\n\nReminder: We have a placement test tomorrow, [Date].\n\n▶ Time: [Time]\n▶ Evaluating Teacher: [Teacher Name]\n▶ Student: [Student Name / Program]\n\nPlease be prepared. Thank you! 😊"},
+    {title:"반배정 테스트 공지 (당일 09:00)",tag:"전체교사방 (in English)",tc:"purple",note:"테스트 당일 오전 09:00 발송 (2차 공지).",text:"Good morning!\n\nJust a reminder that we have a placement test today.\n\n▶ Time: [Time]\n▶ Evaluating Teacher: [Teacher Name]\n▶ Student: [Student Name / Program]\n\nThank you! 😊"},
+    {title:"키즈아머 소독일 공지 (당일 09:00)",tag:"한국인교사방 (한국어)",tc:"blue",note:"소독일 당일 오전 09:00 한국인교사방에 발송.",text:"선생님들께,\n\n오늘 저녁 정기 원내 소독이 진행됩니다.\n\n▶ 일시: 오늘 오후 7시\n▶ 업체: 키즈아머\n\n퇴근 후 별도 조치 사항은 없습니다.\n감사합니다 😊"}
+  ],
+  "sms":[
+    {title:"수납 안내 문자 (납부 안내일 오전 10시)",tag:"SMS 발송 (오전 10:00)",tc:"amber",note:"익월 학사 시작일 2주일~10일 전 발송. 실제 금액은 [문자 전송 내역] 파일 참고.",text:"[알티오라 위례] 안녕하세요, 학부모님.\n\n[월] 교습비 납부 안내드립니다.\n\n▶ 납부 금액: [금액]원\n▶ 납부 기한: [마감일]\n▶ 입금 계좌: 국민은행 045537-04-004674 (알티오라)\n▶ 신용카드 결제: 통통통 앱 이용 가능\n\n문의: 031-778-6655"},
+    {title:"납부 마감 안내 문자 (마감일 오전 10시)",tag:"SMS 발송 (오전 10:00)",tc:"amber",note:"납부 마감일 오전 10시 발송.",text:"[알티오라 위례] 안녕하세요, 학부모님.\n\n[월] 교습비 납부 마감일 안내드립니다.\n\n▶ 마감일: 오늘([날짜])까지\n▶ 입금 계좌: 국민은행 045537-04-004674 (알티오라)\n\n이미 납부하신 경우 양해 부탁드립니다.\n문의: 031-778-6655"},
+    {title:"미납자 개별 안내 (키즈노트 알림장)",tag:"키즈노트 알림장 (개별)",tc:"red",note:"납부 마감일 다음날 오전 11시. 개인별 키즈노트 알림장으로 발송.",text:"안녕하세요, 알티오라 위례입니다.\n\n[원생 이름] 학부모님,\n[월] 교습비가 아직 미납 상태입니다.\n\n▶ 납부 금액: [금액]원\n▶ 입금 계좌: 국민은행 045537-04-004674 (알티오라)\n▶ 신용카드 결제: 통통통 앱 이용 가능\n\n빠른 시일 내 납부 부탁드립니다.\n감사합니다.\n알티오라 위례 드림"},
+    {title:"통통통 회원가입 안내 (신규생)",tag:"SMS (통통통 앱에서 발송)",tc:"amber",note:"통통통 학사관리 > 앱관리 > 회원관리 > 원생명 조회 > 회원가입 무료문자 보내기.",text:"▶ 발송 경로\n통통통 학사관리\n→ 앱관리\n→ 회원관리\n→ 원생명 조회\n→ [회원가입 무료문자 보내기] 클릭\n\n(시스템 자동 문자 — 별도 내용 작성 불필요)"}
+  ],
+  "카톡":[
+    {title:"주간 상담 보고 (매주 금요일)",tag:"4번 카톡방",tc:"teal",note:"매주 금요일 이사장님/Elly/Hetty/Anna 카톡방에 발송.",text:"안녕하세요, [날짜] 주간 상담 보고 드립니다.\n\n▶ 유치부: [건수]건 — [내용 요약]\n▶ 팬그램: [건수]건 — [내용 요약]\n▶ 페타무스: [건수]건 — [내용 요약]\n\n▶ 등록 확정: [건수]건 ([원생명])\n▶ 진행 중: [건수]건\n\n이상입니다. 감사합니다 😊"},
+    {title:"월말 신규생·퇴원생 보고 (매월 말일)",tag:"4번 카톡방",tc:"teal",note:"매월 말일 이사장님/Elly/Hetty/Anna 카톡방에 발송.",text:"안녕하세요, [월] 말 현황 보고 드립니다.\n\n▶ 신규 등록\n  - 유치부: [건수]명 ([원생명])\n  - 팬그램: [건수]명 ([원생명])\n  - 페타무스: [건수]명 ([원생명])\n\n▶ 퇴원\n  - 유치부: [건수]명 ([원생명], 퇴원일)\n  - 팬그램: [건수]명 ([원생명], 퇴원일)\n  - 페타무스: [건수]명 ([원생명], 퇴원일)\n\n이상입니다. 감사합니다 😊"},
+    {title:"수납 완료 보고 (이사장님 개인 카톡)",tag:"이사장님 개인 카톡",tc:"teal",note:"해당 월 수납 완료 후 이사장님 개인 카톡으로 보고.",text:"안녕하세요, 이사장님.\n[월] 수납 완료 보고 드립니다.\n\n▶ 유치부: [금액]원\n▶ 팬그램: [금액]원\n▶ 페타무스: [금액]원\n▶ 합계: [금액]원\n\n이상입니다. 감사합니다 😊"},
+    {title:"환불 송금 요청 (매주 금요일)",tag:"4번 카톡방",tc:"amber",note:"매주 금요일. 도서보증금 차감 후 금액으로 기재.",text:"안녕하세요, 이사장님.\n환불 송금 요청 드립니다.\n\n▶ [원생이름] ([프로그램])\n  - 환불 사유: [사유]\n  - 환불 금액: [금액]원\n  - 입금 계좌: [은행명] [계좌번호] ([예금주])\n\n이상입니다. 감사합니다 😊"},
+    {title:"이엠북스 교재 결제 요청",tag:"교재 카톡방",tc:"amber",note:"Betty T. 거래명세서와 cross-check 완료 후 발송.",text:"안녕하세요, 이사장님.\n이엠북스 교재 결제 요청 드립니다.\n\n▶ 결제 금액: [금액]원\n  (주문 [금액]원 - 반품환불 [금액]원 = 실결제 [금액]원)\n▶ 담당자: 김상현 차장\n\nBetty T. 거래명세서 금액 확인 완료하였습니다.\n이상입니다. 감사합니다 😊"},
+    {title:"원복 결제 요청",tag:"4번 카톡방",tc:"amber",note:"스마트아이에서 주문 완료 후 발송.",text:"안녕하세요, 이사장님.\n원복 결제 요청 드립니다.\n\n▶ 주문 내역: [원복 종류 및 사이즈]\n▶ 결제 금액: [금액]원\n▶ 업체: 스마트아이\n\n이상입니다. 감사합니다 😊"}
+  ]
+},
+quickref:[
+  {id:"pay",ic:"💳",ti:"수납 방법 & 계좌",rows:[
+    {label:"월 교습비",text:"신용카드 결제 가능",url:""},
+    {label:"기타 비용 (첫달)",text:"계좌이체만 가능",url:""},
+    {label:"기타 비용 (2달~)",text:"계좌이체 / 현금 / 성남사랑상품권 chak",url:""},
+    {label:"도서보증금",text:"계좌이체/현금 — 퇴원 시 전액 환불",url:""},
+    {label:"분실 도서",text:"권당 10,000원 보증금 차감",url:""},
+    {label:"수납 확인",text:"① 단말기 ② 통통통 비대면 ③ chak 앱 ④ 국민은행",url:""},
+    {label:"입금 계좌",text:"국민은행 045537-04-004674",url:""}
+  ]},
+  {id:"kakao",ic:"💬",ti:"카톡방 & 보고 경로",rows:[
+    {label:"4번 카톡방",text:"이사장님 / Elly / Hetty / Anna",url:""},
+    {label:"결제·환불 요청",text:"4번 카톡방 → 이사장님 (매주 금요일)",url:""},
+    {label:"주간 상담 보고",text:"4번 카톡방 (매주 금요일)",url:""},
+    {label:"구글폼 시트 보고",text:"원장님 행정방 (매주 금요일)",url:""},
+    {label:"월말 보고",text:"4번 카톡방 (매월 말일)",url:""},
+    {label:"큐라스픽 인원",text:"원장님 행정방 (매월 초)",url:""},
+    {label:"이사장님 수납 보고",text:"개인 카톡 (해당월 납부 완료 후)",url:""}
+  ]},
+  {id:"contact",ic:"📞",ti:"주요 연락처 & 업체",rows:[
+    {label:"이엠북스",text:"김상현 차장 (카톡으로 결제 요청)",url:""},
+    {label:"원복 스마트아이",text:"",url:"https://altiora.firstmall.kr/intro/intro_main"},
+    {label:"팬그램 가방 세꼬마네꼬마",text:"ID: altiorawr / PW: altiora6632+",url:"https://m.secomanecoma.co.kr/"},
+    {label:"러닝앤코 (본사 교재)",text:"반품 처리 확인",url:"https://learningbox.biz/login_form.php?RedirectUrl=center_main.php"},
+    {label:"키즈아머",text:"격월 금요일 오후 7시 정기소독",url:""},
+    {label:"나이스파크 주차",text:"주차권 30개 이하 → 이사장님께 충전 요청 / 회차 20분",url:""}
+  ]},
+  {id:"files",ic:"📂",ti:"주요 파일 위치",rows:[
+    {label:"매일 사용",text:"공유파일 > 00관리자 > 05 전화상담 및 2026 신규생 명단",url:""},
+    {label:"수납 특이사항",text:"공유파일 > 00관리자 > 01 수납관련(중요) > 00 2026학년도 수납 특이사항",url:""},
+    {label:"납부 안내문",text:"공유파일 > 00관리자 > 10 행정 > 1. 납부안내문",url:""},
+    {label:"원복 재고",text:"공유파일 > 00관리자 > 03 원복 관련 > 원복 주문&재고 현황",url:""},
+    {label:"조직도/직원현황",text:"공유파일 > 00관리자 > 06 조직도_직원현황_2026",url:""},
+    {label:"반배정 테스트",text:"공유파일 > 00관리자 > 05 > 반배정 TEST 2026 (2번째 시트)",url:""},
+    {label:"교사 Timetable",text:"공유파일 > 05 Time Table > Schedule As of 2026 April",url:""},
+    {label:"방역(키즈아머)",text:"공유파일 > 00관리자 > 09 방역 (키즈아머, 2023년~)",url:""},
+    {label:"현금 시재",text:"공유파일 > 00관리자 > 06 정기등록차량 & 현금시재 관리",url:""}
+  ]},
+  {id:"sites",ic:"🔗",ti:"주요 사이트 & 계정",rows:[
+    {label:"원복 스마트아이",text:"",url:"https://altiora.firstmall.kr/intro/intro_main"},
+    {label:"팬그램 가방 세꼬마네꼬마",text:"ID: altiorawr / PW: altiora6632+",url:"https://m.secomanecoma.co.kr/"},
+    {label:"러닝앤코 (반품)",text:"Book order 메뉴",url:"https://learningbox.biz/login_form.php?RedirectUrl=center_main.php"},
+    {label:"서머캠프 구글폼",text:"",url:"https://m.site.naver.com/25Kq1"},
+    {label:"국민은행 인터넷뱅킹",text:"계좌: 045537-04-004674",url:"https://www.kbstar.com"},
+    {label:"홈택스 (연말정산)",text:"외국인 교사 연말정산",url:"https://www.hometax.go.kr"},
+    {label:"국세청 영문 안내",text:"원어민 교사용",url:"https://www.nts.go.kr/english/main.do"}
+  ]},
+  {id:"shuttle",ic:"🚌",ti:"외부교사 주차 등록",rows:[
+    {label:"셔틀 담당",text:"바다 선생님",url:""},
+    {label:"3호 차량 (매일)",text:"17:00 이후 지하주차장 등록 필수 — 737소5170",url:""},
+    {label:"월 K-pop 교사",text:"63무4780 / 24오0238 (가끔)",url:""},
+    {label:"화 링크랑 대표",text:"389거8076 (가끔)",url:""},
+    {label:"수 English PE",text:"178두3144",url:""},
+    {label:"목 뮤직티피코 Sarah",text:"319부9929",url:""},
+    {label:"키즈티티·뮤직티피코 대표",text:"248더8859 (가끔)",url:""},
+    {label:"주차 기준",text:"무료 회차 20분 / 방문 학부모·외부교사 전원 주차 할인 등록",url:""}
+  ]}
+]
+};
+
+
+// ─── STATE ─────────────────────────────────────────────────
+var S = {
+  d: null,
+  editMode: false,
+  loaded: false,
+  aTab: "home",
+  checkCat: "신규생_유치부",
+  regProg: "유치부",
+  payS: "환불",
+  openRef: null,
+  msgCat: "키즈노트",
+  chk: {}
+};
+
+var SC = {
+  teal:  {bg:"#E1F5EE",t:"#0F6E56",b:"#5DCAA5"},
+  blue:  {bg:"#E6F1FB",t:"#185FA5",b:"#85B7EB"},
+  purple:{bg:"#EEEDFE",t:"#534AB7",b:"#AFA9EC"},
+  amber: {bg:"#FAEEDA",t:"#854F0B",b:"#EF9F27"},
+  red:   {bg:"#FCEBEB",t:"#A32D2D",b:"#f0a0a0"},
+  gray:  {bg:"#F0F0EB",t:"#5a5a5a",b:"#c8c8c0"}
+};
+
+var tagBg = {teal:"#E1F5EE",blue:"#E6F1FB",amber:"#FAEEDA",red:"#FCEBEB",purple:"#EEEDFE"};
+var tagTc = {teal:"#0F6E56",blue:"#185FA5",amber:"#854F0B",red:"#A32D2D",purple:"#534AB7"};
+
+// ─── FIREBASE HELPERS ──────────────────────────────────────
+function fbSave(path, val) {
+  db.ref(path).set(val);
+  render();
+}
+
+function deepGet(obj, path) {
+  var parts = path.split("/");
+  var cur = obj;
+  for (var i = 0; i < parts.length; i++) {
+    if (cur == null) return null;
+    cur = cur[parts[i]];
+  }
+  return cur;
+}
+
+function deepSet(obj, path, val) {
+  var parts = path.split("/");
+  var cur = obj;
+  for (var i = 0; i < parts.length - 1; i++) {
+    if (!cur[parts[i]]) cur[parts[i]] = {};
+    cur = cur[parts[i]];
+  }
+  cur[parts[parts.length - 1]] = val;
+}
+
+function arrClone(v) { return JSON.parse(JSON.stringify(v || [])); }
+
+// ─── INIT ──────────────────────────────────────────────────
+function init() {
+  db.ref("/").once("value", function(snap) {
+    var val = snap.val();
+    if (!val || !val.routines) {
+      db.ref("/").set(DEF, function() {
+        S.d = JSON.parse(JSON.stringify(DEF));
+        S.loaded = true;
+        render();
+      });
+    } else {
+      S.d = val;
+      S.loaded = true;
+      render();
+    }
+  });
+}
+
+// ─── RENDER ────────────────────────────────────────────────
+var TABS = [
+  {id:"home",    lbl:"🏠 홈"},
+  {id:"consult", lbl:"📞 상담"},
+  {id:"register",lbl:"✏️ 등록"},
+  {id:"checklist",lbl:"✅ 체크리스트"},
+  {id:"payment", lbl:"💰 환불·결제"},
+  {id:"messages",lbl:"📋 메시지"},
+  {id:"quickref",lbl:"📌 빠른참조"}
+];
+
+function render() {
+  var app = document.getElementById("app");
+  if (S.editMode) app.classList.add("edit-mode");
+  else app.classList.remove("edit-mode");
+
+  var eb = document.getElementById("editBtn");
+  if (eb) {
+    eb.textContent = S.editMode ? "✏️ 편집 종료" : "✏️ 편집 모드";
+    eb.classList.toggle("active", S.editMode);
+  }
+
+  var banner = document.getElementById("editBanner");
+  if (banner) {
+    if (S.editMode) {
+      document.getElementById("app").classList.add("edit-mode-on");
+      banner.style.display = "block";
+    } else {
+      document.getElementById("app").classList.remove("edit-mode-on");
+      banner.style.display = "none";
+    }
+  }
+
+  var th = "";
+  for (var i = 0; i < TABS.length; i++) {
+    var t = TABS[i];
+    th += '<button class="tab' + (S.aTab === t.id ? " active" : "") + '" data-tab="' + t.id + '">' + t.lbl + '</button>';
+  }
+  document.getElementById("tabs").innerHTML = th;
+
+  var c = document.getElementById("content");
+  if (!S.loaded) {
+    c.innerHTML = '<div class="loading">데이터 불러오는 중...</div>';
+    return;
+  }
+  if (S.aTab === "home")       c.innerHTML = rHome();
+  else if (S.aTab === "consult")    c.innerHTML = rConsult();
+  else if (S.aTab === "register")   c.innerHTML = rReg();
+  else if (S.aTab === "checklist")  c.innerHTML = rCL();
+  else if (S.aTab === "payment")    c.innerHTML = rPay();
+  else if (S.aTab === "messages")   c.innerHTML = rMsgs();
+  else                               c.innerHTML = rQRef();
+}
+
+// ─── EVENT DELEGATION ──────────────────────────────────────
+document.addEventListener("click", function(e) {
+  var el = e.target;
+  while (el && el !== document) {
+    var act = el.dataset.act;
+    if (act) { handleAction(act, el.dataset); return; }
+    if (el.dataset.tab) { S.aTab = el.dataset.tab; render(); return; }
+    if (el.dataset.reg) { S.regProg = el.dataset.reg; render(); return; }
+    if (el.dataset.cat) { S.checkCat = el.dataset.cat; render(); return; }
+    if (el.dataset.pay) { S.payS = el.dataset.pay; render(); return; }
+    if (el.dataset.msg) { S.msgCat = el.dataset.msg; render(); return; }
+    if (el.dataset.ref) { S.openRef = S.openRef === el.dataset.ref ? null : el.dataset.ref; render(); return; }
+    if (el.dataset.ck)  { var k = el.dataset.ck; S.chk[k] = !S.chk[k]; render(); return; }
+    if (el.dataset.rst) { Object.keys(S.chk).forEach(function(k){ if(k.indexOf(S.checkCat+"_")===0) delete S.chk[k]; }); render(); return; }
+    if (el.dataset.cpy !== undefined) { copyMsg(parseInt(el.dataset.cpy)); return; }
+    if (el.id === "editBtn") { S.editMode = !S.editMode; render(); return; }
+    if (el.tagName === "A") return;
+    el = el.parentElement;
+  }
+});
+
+// ─── ACTION HANDLER ────────────────────────────────────────
+function handleAction(act, ds) {
+  var idx = ds.idx !== undefined ? parseInt(ds.idx) : -1;
+  var idx2 = ds.idx2 !== undefined ? parseInt(ds.idx2) : -1;
+
+  if (act === "addRoutineTask") {
+    openModal("업무 추가", [
+      {id:"task", label:"업무 내용", type:"text", value:"", ph:"예: 주간보고 발송"},
+      {id:"target", label:"대상/채널", type:"text", value:"", ph:"예: 4번 카톡방"}
+    ], function(v) {
+      var rt = arrClone(S.d.routines);
+      rt[idx].tasks.push({task:v.task, target:v.target});
+      S.d.routines = rt;
+      fbSave("routines", rt);
+    });
+  } else if (act === "editRoutineTask") {
+    var t = S.d.routines[idx].tasks[idx2];
+    openModal("업무 수정", [
+      {id:"task", label:"업무 내용", type:"text", value:t.task, ph:""},
+      {id:"target", label:"대상/채널", type:"text", value:t.target||"", ph:""}
+    ], function(v) {
+      var rt = arrClone(S.d.routines);
+      rt[idx].tasks[idx2] = {task:v.task, target:v.target};
+      S.d.routines = rt;
+      fbSave("routines", rt);
+    });
+  } else if (act === "delRoutineTask") {
+    if (!confirm("이 업무를 삭제할까요?")) return;
+    var rt = arrClone(S.d.routines);
+    rt[idx].tasks.splice(idx2, 1);
+    S.d.routines = rt;
+    fbSave("routines", rt);
+  } else if (act === "editConsultChannel") {
+    var ch = S.d.consult.channels[idx];
+    openModal("채널 수정", [
+      {id:"name", label:"채널명", type:"text", value:ch.name, ph:""},
+      {id:"mgr", label:"담당자", type:"text", value:ch.mgr||"", ph:""},
+      {id:"desc", label:"설명", type:"textarea", value:ch.desc||"", ph:""}
+    ], function(v) {
+      var cc = arrClone(S.d.consult.channels);
+      cc[idx] = Object.assign(cc[idx], {name:v.name, mgr:v.mgr, desc:v.desc});
+      S.d.consult.channels = cc;
+      fbSave("consult/channels", cc);
+    });
+  } else if (act === "delConsultChannel") {
+    if (!confirm("이 채널을 삭제할까요?")) return;
+    var cc = arrClone(S.d.consult.channels);
+    cc.splice(idx, 1);
+    S.d.consult.channels = cc;
+    fbSave("consult/channels", cc);
+  } else if (act === "addConsultChannel") {
+    openModal("채널 추가", [
+      {id:"name", label:"채널명", type:"text", value:"", ph:"예: 인스타그램"},
+      {id:"mgr", label:"담당자", type:"text", value:"", ph:"예: 담당: 바다"},
+      {id:"desc", label:"설명", type:"textarea", value:"", ph:""}
+    ], function(v) {
+      var cc = arrClone(S.d.consult.channels);
+      cc.push({name:v.name, mgr:v.mgr, desc:v.desc, bg:"#F1EFE8", tc:"#5a5a5a"});
+      S.d.consult.channels = cc;
+      fbSave("consult/channels", cc);
+    });
+  } else if (act === "editTestItem") {
+    var fld = ds.fld;
+    var arr = arrClone(S.d.consult[fld]);
+    openModal("항목 수정", [{id:"val", label:"내용", type:"text", value:arr[idx], ph:""}], function(v) {
+      arr[idx] = v.val;
+      S.d.consult[fld] = arr;
+      fbSave("consult/" + fld, arr);
+    });
+  } else if (act === "delTestItem") {
+    if (!confirm("이 항목을 삭제할까요?")) return;
+    var fld = ds.fld;
+    var arr = arrClone(S.d.consult[fld]);
+    arr.splice(idx, 1);
+    S.d.consult[fld] = arr;
+    fbSave("consult/" + fld, arr);
+  } else if (act === "addTestItem") {
+    var fld = ds.fld;
+    openModal("항목 추가", [{id:"val", label:"내용", type:"text", value:"", ph:""}], function(v) {
+      var arr = arrClone(S.d.consult[fld]);
+      arr.push(v.val);
+      S.d.consult[fld] = arr;
+      fbSave("consult/" + fld, arr);
+    });
+  } else if (act === "editTestStep") {
+    var st = S.d.consult.testSteps[idx];
+    openModal("단계 수정", [
+      {id:"t", label:"내용", type:"text", value:st.t, ph:""},
+      {id:"c", label:"색상", type:"color", value:st.c}
+    ], function(v) {
+      var arr = arrClone(S.d.consult.testSteps);
+      arr[idx] = {t:v.t, c:v.c};
+      S.d.consult.testSteps = arr;
+      fbSave("consult/testSteps", arr);
+    });
+  } else if (act === "delTestStep") {
+    if (!confirm("이 단계를 삭제할까요?")) return;
+    var arr = arrClone(S.d.consult.testSteps);
+    arr.splice(idx, 1);
+    S.d.consult.testSteps = arr;
+    fbSave("consult/testSteps", arr);
+  } else if (act === "addTestStep") {
+    openModal("단계 추가", [
+      {id:"t", label:"내용", type:"text", value:"", ph:"단계 설명"},
+      {id:"c", label:"색상", type:"color", value:"teal"}
+    ], function(v) {
+      var arr = arrClone(S.d.consult.testSteps);
+      arr.push({t:v.t, c:v.c});
+      S.d.consult.testSteps = arr;
+      fbSave("consult/testSteps", arr);
+    });
+  } else if (act === "editStep") {
+    var src = ds.src;
+    var steps = arrClone(deepGet(S.d, src));
+    var st = steps[idx];
+    openModal("단계 수정", [
+      {id:"t", label:"단계명", type:"text", value:st.t, ph:""},
+      {id:"d", label:"설명", type:"textarea", value:st.d||"", ph:""},
+      {id:"c", label:"색상", type:"color", value:st.c}
+    ], function(v) {
+      steps[idx] = Object.assign(steps[idx], {t:v.t, d:v.d, c:v.c});
+      deepSet(S.d, src, steps);
+      fbSave(src, steps);
+    });
+  } else if (act === "delStep") {
+    if (!confirm("이 단계를 삭제할까요?")) return;
+    var src = ds.src;
+    var steps = arrClone(deepGet(S.d, src));
+    steps.splice(idx, 1);
+    steps.forEach(function(s, i){ s.n = i+1; });
+    deepSet(S.d, src, steps);
+    fbSave(src, steps);
+  } else if (act === "addStep") {
+    var src = ds.src;
+    openModal("단계 추가", [
+      {id:"t", label:"단계명", type:"text", value:"", ph:""},
+      {id:"d", label:"설명", type:"textarea", value:"", ph:""},
+      {id:"c", label:"색상", type:"color", value:"teal"}
+    ], function(v) {
+      var steps = arrClone(deepGet(S.d, src));
+      steps.push({n:steps.length+1, t:v.t, d:v.d, c:v.c});
+      deepSet(S.d, src, steps);
+      fbSave(src, steps);
+    });
+  } else if (act === "editClItem") {
+    var cat = ds.cat, gi = parseInt(ds.gi), ii = parseInt(ds.ii);
+    var val = S.d.checklist[cat][gi].items[ii];
+    openModal("항목 수정", [{id:"v", label:"내용", type:"text", value:val, ph:""}], function(v) {
+      var cl = arrClone(S.d.checklist[cat]);
+      cl[gi].items[ii] = v.v;
+      S.d.checklist[cat] = cl;
+      fbSave("checklist/" + cat, cl);
+    });
+  } else if (act === "delClItem") {
+    if (!confirm("이 항목을 삭제할까요?")) return;
+    var cat = ds.cat, gi = parseInt(ds.gi), ii = parseInt(ds.ii);
+    var cl = arrClone(S.d.checklist[cat]);
+    cl[gi].items.splice(ii, 1);
+    S.d.checklist[cat] = cl;
+    fbSave("checklist/" + cat, cl);
+  } else if (act === "addClItem") {
+    var cat = ds.cat, gi = parseInt(ds.gi);
+    openModal("항목 추가", [{id:"v", label:"내용", type:"text", value:"", ph:"체크리스트 항목"}], function(v) {
+      var cl = arrClone(S.d.checklist[cat]);
+      cl[gi].items.push(v.v);
+      S.d.checklist[cat] = cl;
+      fbSave("checklist/" + cat, cl);
+    });
+  } else if (act === "editClGroup") {
+    var cat = ds.cat, gi = parseInt(ds.gi);
+    var gname = S.d.checklist[cat][gi].g;
+    openModal("그룹명 수정", [{id:"g", label:"그룹명", type:"text", value:gname, ph:""}], function(v) {
+      var cl = arrClone(S.d.checklist[cat]);
+      cl[gi].g = v.g;
+      S.d.checklist[cat] = cl;
+      fbSave("checklist/" + cat, cl);
+    });
+  } else if (act === "delClGroup") {
+    if (!confirm("이 그룹을 삭제할까요?")) return;
+    var cat = ds.cat, gi = parseInt(ds.gi);
+    var cl = arrClone(S.d.checklist[cat]);
+    cl.splice(gi, 1);
+    S.d.checklist[cat] = cl;
+    fbSave("checklist/" + cat, cl);
+  } else if (act === "addClGroup") {
+    var cat = ds.cat;
+    openModal("그룹 추가", [{id:"g", label:"그룹명", type:"text", value:"", ph:"예: 교사 공지"}], function(v) {
+      var cl = arrClone(S.d.checklist[cat]);
+      cl.push({g:v.g, items:[]});
+      S.d.checklist[cat] = cl;
+      fbSave("checklist/" + cat, cl);
+    });
+  } else if (act === "editMsg") {
+    var cat = ds.cat, m = S.d.messages[cat][idx];
+    openModal("템플릿 수정", [
+      {id:"title", label:"제목", type:"text", value:m.title, ph:""},
+      {id:"tag", label:"태그", type:"text", value:m.tag, ph:"예: 키즈노트 알림장"},
+      {id:"note", label:"참고사항", type:"text", value:m.note||"", ph:""},
+      {id:"text", label:"메시지 내용", type:"textarea", value:m.text, ph:""}
+    ], function(v) {
+      var arr = arrClone(S.d.messages[cat]);
+      arr[idx] = Object.assign(arr[idx], {title:v.title, tag:v.tag, note:v.note, text:v.text});
+      S.d.messages[cat] = arr;
+      fbSave("messages/" + cat, arr);
+    });
+  } else if (act === "delMsg") {
+    if (!confirm("이 템플릿을 삭제할까요?")) return;
+    var cat = ds.cat;
+    var arr = arrClone(S.d.messages[cat]);
+    arr.splice(idx, 1);
+    S.d.messages[cat] = arr;
+    fbSave("messages/" + cat, arr);
+  } else if (act === "addMsg") {
+    var cat = ds.cat;
+    openModal("템플릿 추가", [
+      {id:"title", label:"제목", type:"text", value:"", ph:"템플릿 제목"},
+      {id:"tag", label:"태그", type:"text", value:"", ph:"예: 키즈노트 알림장"},
+      {id:"note", label:"참고사항", type:"text", value:"", ph:""},
+      {id:"text", label:"메시지 내용", type:"textarea", value:"", ph:"메시지 내용을 입력하세요"}
+    ], function(v) {
+      var arr = arrClone(S.d.messages[cat]);
+      arr.push({title:v.title, tag:v.tag, tc:"teal", note:v.note, text:v.text});
+      S.d.messages[cat] = arr;
+      fbSave("messages/" + cat, arr);
+    });
+  } else if (act === "editQRow") {
+    var si = parseInt(ds.si), ri = parseInt(ds.ri);
+    var row = S.d.quickref[si].rows[ri];
+    openModal("항목 수정", [
+      {id:"label", label:"항목명", type:"text", value:row.label, ph:""},
+      {id:"text", label:"내용", type:"text", value:row.text||"", ph:""},
+      {id:"url", label:"링크 URL (없으면 공란)", type:"text", value:row.url||"", ph:"https://..."}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      qr[si].rows[ri] = {label:v.label, text:v.text, url:v.url};
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "delQRow") {
+    if (!confirm("이 항목을 삭제할까요?")) return;
+    var si = parseInt(ds.si), ri = parseInt(ds.ri);
+    var qr = arrClone(S.d.quickref);
+    qr[si].rows.splice(ri, 1);
+    S.d.quickref = qr;
+    fbSave("quickref", qr);
+  } else if (act === "addQRow") {
+    var si = parseInt(ds.si);
+    openModal("항목 추가", [
+      {id:"label", label:"항목명", type:"text", value:"", ph:""},
+      {id:"text", label:"내용", type:"text", value:"", ph:""},
+      {id:"url", label:"링크 URL (없으면 공란)", type:"text", value:"", ph:"https://..."}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      qr[si].rows.push({label:v.label, text:v.text, url:v.url});
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "editQSec") {
+    var si = parseInt(ds.si);
+    var sec = S.d.quickref[si];
+    openModal("섹션 수정", [
+      {id:"ic", label:"아이콘 (이모지)", type:"text", value:sec.ic, ph:"💳"},
+      {id:"ti", label:"섹션 제목", type:"text", value:sec.ti, ph:""}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      qr[si].ic = v.ic;
+      qr[si].ti = v.ti;
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "delQSec") {
+    if (!confirm("이 섹션을 삭제할까요?")) return;
+    var si = parseInt(ds.si);
+    var qr = arrClone(S.d.quickref);
+    qr.splice(si, 1);
+    S.d.quickref = qr;
+    fbSave("quickref", qr);
+  } else if (act === "addQSec") {
+    openModal("섹션 추가", [
+      {id:"ic", label:"아이콘 (이모지)", type:"text", value:"📋", ph:""},
+      {id:"ti", label:"섹션 제목", type:"text", value:"", ph:""}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      qr.push({id:"sec_"+Date.now(), ic:v.ic, ti:v.ti, rows:[]});
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "editPayStep") {
+    var src = ds.src;
+    var arr = arrClone(deepGet(S.d, src));
+    var st = arr[idx];
+    openModal("단계 수정", [
+      {id:"t", label:"단계명", type:"text", value:st.t, ph:""},
+      {id:"d", label:"설명", type:"textarea", value:st.d||"", ph:""},
+      {id:"c", label:"색상", type:"color", value:st.c}
+    ], function(v) {
+      arr[idx] = Object.assign(arr[idx], {t:v.t, d:v.d, c:v.c});
+      deepSet(S.d, src, arr);
+      fbSave(src, arr);
+    });
+  } else if (act === "delPayStep") {
+    if (!confirm("이 단계를 삭제할까요?")) return;
+    var src = ds.src;
+    var arr = arrClone(deepGet(S.d, src));
+    arr.splice(idx, 1);
+    deepSet(S.d, src, arr);
+    fbSave(src, arr);
+  } else if (act === "addPayStep") {
+    var src = ds.src;
+    openModal("단계 추가", [
+      {id:"t", label:"단계명", type:"text", value:"", ph:""},
+      {id:"d", label:"설명", type:"textarea", value:"", ph:""},
+      {id:"c", label:"색상", type:"color", value:"teal"}
+    ], function(v) {
+      var arr = arrClone(deepGet(S.d, src));
+      arr.push({t:v.t, d:v.d, c:v.c});
+      deepSet(S.d, src, arr);
+      fbSave(src, arr);
+    });
+  }
+}
+
+// ─── MODAL ─────────────────────────────────────────────────
+var modalCb = null;
+
+function openModal(title, fields, onSave) {
+  modalCb = onSave;
+  var fhtml = "";
+  for (var i = 0; i < fields.length; i++) {
+    var f = fields[i];
+    fhtml += '<div class="modal-field"><label>' + f.label + '</label>';
+    if (f.type === "text") {
+      fhtml += '<input id="mf_' + f.id + '" type="text" value="' + escHtml(f.value || "") + '" placeholder="' + escHtml(f.ph || "") + '">';
+    } else if (f.type === "textarea") {
+      fhtml += '<textarea id="mf_' + f.id + '" placeholder="' + escHtml(f.ph || "") + '">' + escHtml(f.value || "") + '</textarea>';
+    } else if (f.type === "color") {
+      var colors = ["teal","blue","purple","amber","red","gray"];
+      fhtml += '<div class="color-options" id="mf_' + f.id + '" data-val="' + (f.value||"teal") + '">';
+      for (var j = 0; j < colors.length; j++) {
+        var cname = colors[j];
+        var c = SC[cname];
+        fhtml += '<div class="color-opt' + (f.value === cname ? " selected" : "") + '" style="background:' + c.bg + ';border-color:' + c.b + '" data-color="' + cname + '" data-field="mf_' + f.id + '" onclick="pickColor(this)"></div>';
+      }
+      fhtml += '</div>';
+    }
+    fhtml += '</div>';
+  }
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalFields").innerHTML = fhtml;
+  document.getElementById("modalOverlay").classList.add("show");
+  var firstInput = document.querySelector("#modalFields input, #modalFields textarea");
+  if (firstInput) setTimeout(function(){ firstInput.focus(); }, 50);
+}
+
+function pickColor(el) {
+  var fieldId = el.dataset.field;
+  var container = document.getElementById(fieldId);
+  container.dataset.val = el.dataset.color;
+  var opts = container.querySelectorAll(".color-opt");
+  for (var i = 0; i < opts.length; i++) opts[i].classList.remove("selected");
+  el.classList.add("selected");
+}
+
+function saveModal() {
+  if (!modalCb) return;
+  var fields = document.querySelectorAll("#modalFields [id^='mf_']");
+  var vals = {};
+  for (var i = 0; i < fields.length; i++) {
+    var el = fields[i];
+    var key = el.id.replace("mf_", "");
+    if (el.classList.contains("color-options")) {
+      vals[key] = el.dataset.val || "teal";
+    } else {
+      vals[key] = el.value;
+    }
+  }
+  modalCb(vals);
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("show");
+  modalCb = null;
+}
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeModal();
+});
+
+// ─── HELPERS ───────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function ectrls(actEdit, actDel, ds) {
+  var attrs = "";
+  var keys = Object.keys(ds);
+  for (var i = 0; i < keys.length; i++) attrs += " data-" + keys[i] + '="' + escHtml(ds[keys[i]]) + '"';
+  return '<div class="edit-ctrl">'
+    + '<button class="eic" data-act="' + actEdit + '"' + attrs + ' title="수정">✏️</button>'
+    + '<button class="eic del" data-act="' + actDel + '"' + attrs + ' title="삭제">🗑️</button>'
+    + '</div>';
+}
+
+function addBtn(label, actName, ds) {
+  var attrs = "";
+  var keys = Object.keys(ds);
+  for (var i = 0; i < keys.length; i++) attrs += " data-" + keys[i] + '="' + escHtml(ds[keys[i]]) + '"';
+  return '<button class="add-btn" data-act="' + actName + '"' + attrs + '>' + label + '</button>';
+}
+
+function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm) {
+  var h = '<div class="sflow">';
+  for (var i = 0; i < steps.length; i++) {
+    var s = steps[i], c = SC[s.c] || SC.gray;
+    var sz = sm ? 24 : 30, fs = sm ? 11 : 12, pad = sm ? "8px 12px" : "10px 14px", br = sm ? 8 : 10;
+    var mb = (i < steps.length - 1) ? ";margin-bottom:0" : "";
+    h += '<div class="sitem">';
+    h += '<div style="display:flex;flex-direction:column;align-items:center;width:' + sz + 'px;flex-shrink:0">';
+    h += '<div style="width:' + sz + 'px;height:' + sz + 'px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:' + fs + 'px;font-weight:700;flex-shrink:0;background:' + c.bg + ';color:' + c.t + ';border:1.5px solid ' + c.b + '">' + (s.n || i + 1) + '</div>';
+    if (i < steps.length - 1) h += '<div style="width:1.5px;background:' + c.b + ';margin:2px auto;flex:1;min-height:8px"></div>';
+    h += '</div>';
+    var dsStep = Object.assign({}, dsBase, {idx: i});
+    h += '<div class="sbody' + (sm ? " sm" : "") + '" style="border-left:3px solid ' + c.b + ';padding:' + pad + ';border-radius:' + br + 'px' + mb + '">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+    h += '<div class="step-title">' + escHtml(s.t || s.title || "") + '</div>';
+    if (actEdit) h += ectrls(actEdit, actDel, dsStep);
+    h += '</div>';
+    if (s.d || s.desc) h += '<div class="step-desc">' + escHtml(s.d || s.desc || "") + '</div>';
+    h += '</div></div>';
+  }
+  if (actAdd) h += addBtn("+ 단계 추가", actAdd, dsBase);
+  h += '</div>';
+  return h;
+}
+
+// ─── HOME ──────────────────────────────────────────────────
+function rHome() {
+  var rt = S.d.routines || [];
+  var h = '<div class="stit">고정 업무</div>';
+  h += '<div class="g3">';
+  for (var pi = 0; pi < rt.length; pi++) {
+    var p = rt[pi];
+    h += '<div class="routine-col">';
+    h += '<div class="routine-head" style="background:' + p.pcolor + ';border-bottom:1px solid ' + p.pborder + '">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+    h += '<span class="routine-period" style="color:' + p.ptc + '">' + escHtml(p.period) + '</span></div></div>';
+    h += '<div class="routine-body">';
+    var tasks = p.tasks || [];
+    for (var ti = 0; ti < tasks.length; ti++) {
+      var tk = tasks[ti];
+      h += '<div class="routine-item">';
+      h += '<div class="routine-item-content">';
+      h += '<div class="routine-task">' + escHtml(tk.task) + '</div>';
+      if (tk.target) h += '<div class="routine-target">' + escHtml(tk.target) + '</div>';
+      h += '</div>';
+      h += ectrls("editRoutineTask", "delRoutineTask", {idx:pi, idx2:ti});
+      h += '</div>';
+    }
+    h += addBtn("+ 업무 추가", "addRoutineTask", {idx:pi});
+    h += '</div></div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+// ─── CONSULT ───────────────────────────────────────────────
+function rConsult() {
+  var co = S.d.consult || {};
+  var chs = co.channels || [];
+  var h = '<div class="stit">상담 채널 및 절차</div>';
+  h += '<div class="slbl">STEP 1 — 상담 채널 4종 (매일 출근 즉시 확인)</div>';
+  h += '<div class="g4" style="margin-bottom:12px">';
+  for (var i = 0; i < chs.length; i++) {
+    var ch = chs[i];
+    h += '<div class="chcard" style="background:' + ch.bg + '">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
+    h += '<div style="font-size:14px;font-weight:700;color:' + ch.tc + '">' + escHtml(ch.name) + '</div>';
+    h += ectrls("editConsultChannel", "delConsultChannel", {idx:i}) + '</div>';
+    h += '<div style="font-size:11px;font-weight:600;color:' + ch.tc + ';margin-bottom:5px">' + escHtml(ch.mgr||"") + '</div>';
+    h += '<div style="font-size:11px;color:' + ch.tc + ';opacity:.8;white-space:pre-line">' + escHtml(ch.desc||"") + '</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  h += addBtn("+ 채널 추가", "addConsultChannel", {});
+  h += '<div class="arrdn">↓</div>';
+  h += '<div class="card" style="margin-bottom:10px"><div class="slbl">STEP 2 — 상담 기록</div><div style="font-size:13px">[05 전화상담 및 2026 신규생 명단] 파일에 <strong>날짜 / 채널 / 수신인</strong> 항목 모두 기입</div></div>';
+  h += '<div class="arrdn">↓</div>';
+  h += '<div class="card" style="margin-bottom:10px"><div class="slbl">STEP 3 — 행정방 공지</div><div class="g2"><div class="al al-t"><strong>유치부 / 페타무스 상담</strong><br>→ 원장님께 안내</div><div class="al al-b"><strong>팬그램 상담</strong><br>→ 부원장님께 안내</div></div></div>';
+  h += '<div class="arrdn">↓</div>';
+  h += '<div class="card" style="margin-bottom:10px"><div class="slbl">STEP 4 — 반 배정 테스트 필요 여부</div><div class="g2">';
+  h += '<div class="al al-a"><strong>⚠️ 테스트 필요</strong>';
+  var req = co.testReq || [];
+  h += '<ul style="margin:6px 0 0 16px;line-height:2">';
+  for (var i = 0; i < req.length; i++) {
+    h += '<li style="display:flex;justify-content:space-between;align-items:center">' + escHtml(req[i]);
+    h += ectrls("editTestItem","delTestItem",{fld:"testReq",idx:i}) + '</li>';
+  }
+  h += '</ul>' + addBtn("+ 항목 추가","addTestItem",{fld:"testReq"}) + '</div>';
+  h += '<div class="al al-t"><strong>✅ 테스트 불필요 → 바로 등록</strong>';
+  var nreq = co.testNoReq || [];
+  h += '<ul style="margin:6px 0 0 16px;line-height:2">';
+  for (var i = 0; i < nreq.length; i++) {
+    h += '<li style="display:flex;justify-content:space-between;align-items:center">' + escHtml(nreq[i]);
+    h += ectrls("editTestItem","delTestItem",{fld:"testNoReq",idx:i}) + '</li>';
+  }
+  h += '</ul>' + addBtn("+ 항목 추가","addTestItem",{fld:"testNoReq"});
+  if (co.testNote) h += '<div style="margin-top:8px;padding:4px 8px;background:#9FE1CB;border-radius:6px;font-size:11px">' + escHtml(co.testNote) + '</div>';
+  h += '</div></div></div>';
+  h += '<div class="arrdn">↓</div>';
+  h += '<div class="card"><div class="slbl">STEP 5 — 테스트 진행 절차</div>';
+  h += stepFlow(co.testSteps||[], "editTestStep", "delTestStep", "addTestStep", {});
+  h += '</div>';
+  return h;
+}
+
+// ─── REGISTER ──────────────────────────────────────────────
+function rReg() {
+  var progs = ["유치부","팬그램","페타무스"];
+  var h = '<div class="stit">신규생 등록 절차</div><div class="segs">';
+  for (var i = 0; i < progs.length; i++) {
+    h += '<button class="seg' + (S.regProg === progs[i] ? " active" : "") + '" data-reg="' + progs[i] + '">' + progs[i] + '</button>';
+  }
+  h += '</div>';
+  var src = "register/" + S.regProg;
+  var steps = deepGet(S.d, src) || [];
+  h += stepFlow(steps, "editStep", "delStep", "addStep", {src: src});
+  h += '<div style="height:14px"></div>';
+  h += '<div class="al al-a"><strong>💳 수납 규칙 요약</strong><br>월 교습비 → 신용카드 가능 &nbsp;|&nbsp; 기타 비용 첫달 → 계좌이체만 &nbsp;|&nbsp; 2달~ → 성남사랑상품권 chak 가능<br>도서보증금 → 계좌이체/현금 (퇴원 시 전액 환불 / 분실 시 권당 10,000원 차감)</div>';
+  if (S.regProg === "유치부") h += '<div style="height:12px"></div><div class="al al-b"><strong>📋 신입생 L파일 구성</strong><br>① 신입생 안내문 &nbsp;② 해당월 식단 &nbsp;③ 유치부 Calendar &nbsp;④ 셔틀 뱃지</div>';
+  if (S.regProg === "팬그램") h += '<div style="height:12px"></div><div class="al al-b"><strong>📋 신입생 L파일 구성</strong><br>① 신입생 안내문 &nbsp;② Calendar &nbsp;③ 셔틀 뱃지 &nbsp;④ Monthly Lesson Plan (담임 cross-check)</div>';
+  return h;
+}
+
+// ─── CHECKLIST ─────────────────────────────────────────────
+function rCL() {
+  var cats = [
+    {k:"신규생_유치부",l:"신규생 유치부"},{k:"신규생_팬그램",l:"신규생 팬그램"},
+    {k:"신규생_페타무스",l:"신규생 페타무스"},{k:"퇴원생",l:"퇴원생"},{k:"신규직원",l:"신규 직원"}
+  ];
+  var data = S.d.checklist[S.checkCat] || [];
+  var tot = 0, dn = 0;
+  for (var i = 0; i < data.length; i++)
+    for (var j = 0; j < data[i].items.length; j++) {
+      tot++;
+      if (S.chk[S.checkCat + "_" + i + "_" + j]) dn++;
+    }
+  var pct = tot > 0 ? Math.round(dn / tot * 100) : 0;
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  h += '<div class="stit" style="margin:0">체크리스트</div>';
+  h += '<div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px;color:#999">' + dn + '/' + tot + ' 완료</span>';
+  h += '<button class="btn" data-rst="1">↺ 초기화</button>';
+  h += '<button class="btn" onclick="window.print()">🖨 출력</button></div></div>';
+  h += '<div class="segs">';
+  for (var i = 0; i < cats.length; i++)
+    h += '<button class="seg' + (S.checkCat === cats[i].k ? " active" : "") + '" data-cat="' + cats[i].k + '">' + cats[i].l + '</button>';
+  h += '</div>';
+  h += '<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:#999">진행률</span><span style="font-size:12px;font-weight:700;color:' + (pct===100?"#0F6E56":"#333") + '">' + pct + '%' + (pct===100?" ✓":"") + '</span></div>';
+  h += '<div class="pbar"><div class="pfill" style="width:' + pct + '%;background:' + (pct===100?"#1D9E75":"#85B7EB") + '"></div></div></div>';
+  for (var gi = 0; gi < data.length; gi++) {
+    var g = data[gi];
+    h += '<div style="margin-bottom:14px">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+    h += '<div class="slbl" style="margin:0">' + escHtml(g.g) + '</div>';
+    h += ectrls("editClGroup","delClGroup",{cat:S.checkCat,gi:gi}) + '</div>';
+    for (var ii = 0; ii < g.items.length; ii++) {
+      var k = S.checkCat + "_" + gi + "_" + ii;
+      var done = !!S.chk[k];
+      h += '<div class="ci' + (done?" done":"") + '" data-ck="' + k + '">';
+      h += '<div class="cb' + (done?" done":"") + '">' + (done?"✓":"") + '</div>';
+      h += '<span class="ctxt' + (done?" done":"") + '" style="flex:1">' + escHtml(g.items[ii]) + '</span>';
+      h += ectrls("editClItem","delClItem",{cat:S.checkCat,gi:gi,ii:ii});
+      h += '</div>';
+    }
+    h += addBtn("+ 항목 추가","addClItem",{cat:S.checkCat,gi:gi});
+    h += '</div>';
+  }
+  h += addBtn("+ 그룹 추가","addClGroup",{cat:S.checkCat});
+  return h;
+}
+
+// ─── PAYMENT ───────────────────────────────────────────────
+function rPay() {
+  var subs = ["환불","이엠북스","원복","교재반품"];
+  var h = '<div class="stit">환불 · 결제 요청</div><div class="segs">';
+  for (var i = 0; i < subs.length; i++)
+    h += '<button class="seg' + (S.payS === subs[i] ? " active" : "") + '" data-pay="' + subs[i] + '">' + subs[i] + '</button>';
+  h += '</div>';
+  if (S.payS === "교재반품") {
+    var pr = S.d.payment.교재반품 || {lnc:[], emc:[]};
+    h += '<div class="g2">';
+    h += '<div><div class="slbl">알티오라 본사 교재 (러닝앤코)</div>';
+    h += stepFlow(pr.lnc||[], "editPayStep","delPayStep","addPayStep",{src:"payment/교재반품/lnc"}, true);
+    h += '</div><div><div class="slbl">이엠북스 외부 교재</div>';
+    h += stepFlow(pr.emc||[], "editPayStep","delPayStep","addPayStep",{src:"payment/교재반품/emc"}, true);
+    h += '</div></div>';
+  } else {
+    var src = "payment/" + S.payS;
+    var steps = deepGet(S.d, src) || [];
+    h += stepFlow(steps, "editPayStep","delPayStep","addPayStep",{src:src});
+    if (S.payS === "환불")
+      h += '<div style="height:12px"></div><div class="al al-a"><strong>⚠️ 환불 요청일: 매주 금요일</strong><br>중간에 요청하지 않고 금요일에 모아서 한 번에 요청</div>';
+  }
+  return h;
+}
+
+// ─── MESSAGES ──────────────────────────────────────────────
+function rMsgs() {
+  var cats = [
+    {k:"키즈노트",l:"키즈노트 알림장"},
+    {k:"교사방",l:"전체교사방 공지"},
+    {k:"sms",l:"SMS 수납 안내"},
+    {k:"카톡",l:"카톡 보고·결제"}
+  ];
+  var msgs = S.d.messages[S.msgCat] || [];
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  h += '<div class="stit" style="margin:0">메시지 템플릿</div><span style="font-size:11px;color:#999">[대괄호] 수정 후 복사</span></div>';
+  h += '<div class="segs">';
+  for (var i = 0; i < cats.length; i++)
+    h += '<button class="seg' + (S.msgCat === cats[i].k ? " active" : "") + '" data-msg="' + cats[i].k + '">' + cats[i].l + '</button>';
+  h += '</div>';
+  h += '<div class="al al-b" style="margin-bottom:14px;font-size:12px"><strong>사용 방법:</strong> [대괄호] 안의 내용을 실제 정보로 바꾼 후 📋 복사 버튼을 눌러 붙여넣기 하세요.</div>';
+  for (var i = 0; i < msgs.length; i++) {
+    var m = msgs[i];
+    var hi = escHtml(m.text).replace(/\[([^\]]+)\]/g, '<span style="color:#0F6E56;font-weight:600;background:#E1F5EE;padding:0 2px;border-radius:3px">[$1]</span>');
+    h += '<div class="mc"><div class="mh">';
+    h += '<div style="flex:1"><div class="mt">' + escHtml(m.title) + '</div>';
+    h += '<span class="pill" style="background:' + (tagBg[m.tc]||"#eee") + ';color:' + (tagTc[m.tc]||"#555") + ';margin-top:3px;display:inline-block">' + escHtml(m.tag) + '</span></div>';
+    h += '<div style="display:flex;gap:6px;align-items:center">';
+    h += ectrls("editMsg","delMsg",{cat:S.msgCat,idx:i});
+    h += '<button class="cpybtn" data-cpy="' + i + '">📋 복사</button></div></div>';
+    h += '<div class="mb"><div class="mtxt">' + hi + '</div>';
+    if (m.note) h += '<div class="mnote">💡 ' + escHtml(m.note) + '</div>';
+    h += '</div></div>';
+  }
+  h += addBtn("+ 템플릿 추가","addMsg",{cat:S.msgCat});
+  return h;
+}
+
+// ─── QUICK REF ─────────────────────────────────────────────
+function rQRef() {
+  var qr = S.d.quickref || [];
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">';
+  h += '<div class="stit" style="margin:0">빠른 참조</div>';
+  h += ectrls("","","") ; // placeholder - not used here
+  h += '</div>';
+  h = '<div class="stit">빠른 참조</div>';
+  h += '<div style="display:flex;flex-direction:column;gap:6px">';
+  for (var si = 0; si < qr.length; si++) {
+    var sec = qr[si];
+    h += '<div>';
+    h += '<div class="achdr" data-ref="' + escHtml(sec.id) + '">';
+    h += '<div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600"><span>' + sec.ic + '</span><span>' + escHtml(sec.ti) + '</span></div>';
+    h += '<div style="display:flex;align-items:center;gap:6px">';
+    h += ectrls("editQSec","delQSec",{si:si});
+    h += '<span style="color:#bbb;font-size:16px">' + (S.openRef === sec.id ? "▲" : "▼") + '</span>';
+    h += '</div></div>';
+    if (S.openRef === sec.id) {
+      h += '<div class="abody">';
+      for (var ri = 0; ri < sec.rows.length; ri++) {
+        var row = sec.rows[ri];
+        h += '<div class="rrow" style="' + (ri === sec.rows.length-1 ? "border:none" : "") + '">';
+        h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
+        h += '<div class="rval">';
+        if (row.url) h += '<a href="' + escHtml(row.url) + '" target="_blank" rel="noopener" class="rlink">🔗 ' + escHtml(extractDomain(row.url)) + '</a>';
+        if (row.text) h += '<span>' + escHtml(row.text) + '</span>';
+        h += '</div>';
+        h += ectrls("editQRow","delQRow",{si:si,ri:ri});
+        h += '</div>';
+      }
+      h += addBtn("+ 항목 추가","addQRow",{si:si});
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  h += addBtn("+ 섹션 추가","addQSec",{});
+  h += '</div>';
+  return h;
+}
+
+function extractDomain(url) {
+  try {
+    var m = url.match(/^https?:\/\/([^\/]+)/);
+    return m ? m[1].replace("www.","") : url;
+  } catch(e) { return url; }
+}
+
+// ─── COPY MSG ──────────────────────────────────────────────
+function copyMsg(idx) {
+  var msgs = S.d.messages[S.msgCat];
+  if (!msgs || !msgs[idx]) return;
+  var txt = msgs[idx].text;
+  var btn = document.querySelector("[data-cpy='" + idx + "']");
+  function fb() {
+    if (btn) {
+      btn.textContent = "✓ 복사됨!";
+      btn.classList.add("ok");
+      setTimeout(function(){ btn.textContent = "📋 복사"; btn.classList.remove("ok"); }, 1800);
+    }
+  }
+  try {
+    navigator.clipboard.writeText(txt).then(fb).catch(function(){
+      var ta = document.createElement("textarea");
+      ta.value = txt; ta.style.cssText = "position:fixed;left:-9999px;opacity:0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+      document.body.removeChild(ta); fb();
+    });
+  } catch(x) {
+    var ta = document.createElement("textarea");
+    ta.value = txt; ta.style.cssText = "position:fixed;left:-9999px;opacity:0";
+    document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+    document.body.removeChild(ta); fb();
+  }
+}
+
+// ─── START ─────────────────────────────────────────────────
+init();
+
+</script>
+</body>
+</html>
