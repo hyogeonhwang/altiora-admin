@@ -139,6 +139,7 @@ body,html{min-height:100%}
     <div class="tabs" id="tabs"></div>
   </div>
   <div id="editBanner" class="edit-banner" style="display:none">✏️ 편집 모드가 활성화되어 있습니다. 항목을 수정/추가/삭제할 수 있습니다.</div>
+  <div id="fbBanner" style="display:none;padding:8px 20px;font-size:12px;text-align:center;border-top:1px solid transparent;border-bottom:1px solid transparent"></div>
   <div class="content" id="content"><div class="loading">데이터 불러오는 중...</div></div>
 </div>
 
@@ -496,11 +497,13 @@ function delNoticeInline(ni) {
 }
 
 function showOfflineBanner() {
-  var b = document.getElementById("editBanner");
+  var b = document.getElementById("fbBanner");
   if (!b) return;
   b.style.display = "block";
   b.style.background = "#FFF3CD";
   b.style.borderColor = "#FFC107";
+  b.style.borderTop = "1px solid #FFC107";
+  b.style.borderBottom = "1px solid #FFC107";
   b.style.color = "#856404";
   b.innerHTML = "⚠️ 오프라인 모드 — 수정사항이 저장되지 않습니다. GitHub Pages에 배포하면 Firebase와 자동 연동됩니다.";
 }
@@ -1613,11 +1616,12 @@ function connectFirebase() {
 }
 
 function showOnlineBanner() {
-  var b = document.getElementById("editBanner");
+  var b = document.getElementById("fbBanner");
   if (!b) return;
   b.style.display = "block";
   b.style.background = "#E1F5EE";
-  b.style.borderColor = "#5DCAA5";
+  b.style.borderTop = "1px solid #5DCAA5";
+  b.style.borderBottom = "1px solid #5DCAA5";
   b.style.color = "#0F6E56";
   b.innerHTML = "✅ Firebase 연결됨 — 모든 수정사항이 자동 저장됩니다.";
   setTimeout(function() { b.style.display = "none"; }, 3000);
