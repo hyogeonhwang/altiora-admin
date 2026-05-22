@@ -1631,17 +1631,7 @@ function connectFirebase() {
   }
 }
 
-function showOnlineBanner() {
-  var b = document.getElementById("fbBanner");
-  if (!b) return;
-  b.style.display = "block";
-  b.style.background = "#E1F5EE";
-  b.style.borderTop = "1px solid #5DCAA5";
-  b.style.borderBottom = "1px solid #5DCAA5";
-  b.style.color = "#0F6E56";
-  b.innerHTML = "✅ Firebase 연결됨 — 모든 수정사항이 자동 저장됩니다.";
-  setTimeout(function() { b.style.display = "none"; }, 3000);
-}
+function showOnlineBanner() {}
 
 // Firebase 연결 시도
 if (window._fbErr || typeof firebase === "undefined") {
