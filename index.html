@@ -126,6 +126,9 @@ body,html{min-height:100%}
 @media(max-width:640px){.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}.content{padding:14px}}
 @media print{.header,.segs,.btn,.cpybtn,.edit-ctrl,.add-btn,.edit-btn,.edit-banner{display:none!important}body{background:#fff}}
 </style>
+<script>window._fbErr=false;</script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js" onerror="window._fbErr=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js" onerror="window._fbErr=true"></script>
 </head>
 <body>
 <div id="app">
@@ -442,7 +445,10 @@ var tagTc = {teal:"#0F6E56",blue:"#185FA5",amber:"#854F0B",red:"#A32D2D",purple:
 
 // ─── FIREBASE HELPERS ──────────────────────────────────────
 function fbSave(path, val) {
-  if (!S.offline && FIREBASE_OK && db) db.ref(path).set(val);
+  if (!S.offline && db) {
+    try { db.ref(path).set(val); } catch(e) { console.warn("fbSave:",e); }
+  }
+  try { localStorage.setItem("altiora_admin_data", JSON.stringify(S.d)); } catch(e) {}
   render();
 }
 
@@ -497,15 +503,7 @@ function delNoticeInline(ni) {
 }
 
 function showOfflineBanner() {
-  var b = document.getElementById("fbBanner");
-  if (!b) return;
-  b.style.display = "block";
-  b.style.background = "#FFF3CD";
-  b.style.borderColor = "#FFC107";
-  b.style.borderTop = "1px solid #FFC107";
-  b.style.borderBottom = "1px solid #FFC107";
-  b.style.color = "#856404";
-  b.innerHTML = "⚠️ 오프라인 모드 — 수정사항이 저장되지 않습니다. GitHub Pages에 배포하면 Firebase와 자동 연동됩니다.";
+  // 조용히 localStorage만 사용
 }
 
 // ─── RENDER ────────────────────────────────────────────────
@@ -1176,13 +1174,24 @@ function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm) {
 }
 
 // ─── MEMO ─────────────────────────────────────────────────
-var memoTimer = null;
-function onMemoInput(val) {
+function saveMemo() {
+  var area = document.getElementById("memoArea");
+  if (!area) return;
+  var val = area.value;
   S.d.memo = val;
-  clearTimeout(memoTimer);
-  memoTimer = setTimeout(function() {
-    if (!S.offline && db) { try { db.ref("memo").set(val); } catch(e){} }
-  }, 800);
+  if (!S.offline && db) { try { db.ref("memo").set(val); } catch(e){} }
+  try { localStorage.setItem("altiora_admin_data", JSON.stringify(S.d)); } catch(e) {}
+  // 저장 완료 표시
+  var btn = document.querySelector('button[onclick="saveMemo()"]');
+  if (btn) { btn.textContent = "✓ 저장됨"; setTimeout(function(){ btn.textContent = "💾 저장"; }, 1500); }
+}
+
+function clearMemo() {
+  if (!confirm("메모를 삭제할까요?")) return;
+  S.d.memo = "";
+  if (!S.offline && db) { try { db.ref("memo").set(""); } catch(e){} }
+  try { localStorage.setItem("altiora_admin_data", JSON.stringify(S.d)); } catch(e) {}
+  render();
 }
 
 // ─── HOME ──────────────────────────────────────────────────
@@ -1271,8 +1280,11 @@ function rHome() {
   // ── 오늘의 메모
   h += '<div style="margin-top:22px;margin-bottom:10px" class="slbl">오늘의 메모</div>';
   h += '<div style="background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:14px">';
-  h += '<textarea id="memoArea" oninput="onMemoInput(this.value)" placeholder="오늘 처리할 일이나 특이사항을 자유롭게 적어두세요..." style="width:100%;height:110px;border:none;outline:none;font-size:13px;font-family:inherit;resize:none;color:#1a1a1a;background:transparent;line-height:1.8">' + escHtml(memo) + '</textarea>';
-  h += '<div style="font-size:11px;color:#ccc;text-align:right;margin-top:2px">자동 저장</div></div>';
+  h += '<textarea id="memoArea" placeholder="오늘 처리할 일이나 특이사항을 자유롭게 적어두세요..." style="width:100%;height:110px;border:none;outline:none;font-size:13px;font-family:inherit;resize:none;color:#1a1a1a;background:transparent;line-height:1.8">' + escHtml(memo) + '</textarea>';
+  h += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0">';
+  h += '<button onclick="clearMemo()" style="padding:6px 16px;font-size:12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#888;cursor:pointer;font-family:inherit">🗑 삭제</button>';
+  h += '<button onclick="saveMemo()" style="padding:6px 16px;font-size:12px;border:none;border-radius:8px;background:#1D9E75;color:#fff;cursor:pointer;font-family:inherit;font-weight:600">💾 저장</button>';
+  h += '</div></div>';
 
   return h;
 }
@@ -1573,7 +1585,9 @@ function copyMsg(idx) {
 // ─── START ─────────────────────────────────────────────────
 // ─── START ─────────────────────────────────────────────────
 // 기본 데이터 즉시 표시 (파일/로컬에서도 항상 동작)
-S.d = JSON.parse(JSON.stringify(DEF));
+var _ls = null;
+try { var _r = localStorage.getItem("altiora_admin_data"); if(_r) _ls = JSON.parse(_r); } catch(e) {}
+S.d = _ls || JSON.parse(JSON.stringify(DEF));
 S.loaded = true;
 S.offline = true;
 render();
@@ -1598,6 +1612,8 @@ function connectFirebase() {
         } else {
           S.d = val;
           S.offline = false;
+          // Firebase 데이터로 localStorage도 업데이트
+          try { localStorage.setItem("altiora_admin_data", JSON.stringify(val)); } catch(e) {}
           showOnlineBanner();
           render();
         }
@@ -1627,20 +1643,13 @@ function showOnlineBanner() {
   setTimeout(function() { b.style.display = "none"; }, 3000);
 }
 
-if (window.location.protocol !== "file:") {
-  var fbS1 = document.createElement("script");
-  fbS1.src = "https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js";
-  fbS1.onload = function() {
-    var fbS2 = document.createElement("script");
-    fbS2.src = "https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js";
-    fbS2.onload = connectFirebase;
-    fbS2.onerror = showOfflineBanner;
-    document.head.appendChild(fbS2);
-  };
-  fbS1.onerror = showOfflineBanner;
-  document.head.appendChild(fbS1);
-} else {
+// Firebase 연결 시도
+if (window._fbErr || typeof firebase === "undefined") {
   showOfflineBanner();
+} else if (window.location.protocol === "file:") {
+  showOfflineBanner();
+} else {
+  connectFirebase();
 }
 
 </script>
