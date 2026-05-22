@@ -1492,7 +1492,7 @@ function rMsgs() {
   ];
   var msgs = S.d.messages[S.msgCat] || [];
   var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-  h += '<div class="stit" style="margin:0">메시지 템플릿</div><span style="font-size:11px;color:#999">[대괄호] 수정 후 복사</span></div>';
+  h += '<div class="stit" style="margin:0">메시지 템플릿</div><span style="font-size:11px;color:#999">[대괄호] 수정 후 복사</span><button class="edit-ctrl" onclick="resetMessages()" style="padding:4px 10px;font-size:11px;font-weight:600;border:1px solid #85B7EB;background:#E6F1FB;color:#185FA5;border-radius:6px;cursor:pointer;font-family:inherit">↺ 기본 템플릿 복원</button></div>';
   h += '<div class="segs">';
   for (var i = 0; i < cats.length; i++)
     h += '<button class="seg' + (S.msgCat === cats[i].k ? " active" : "") + '" data-msg="' + cats[i].k + '">' + cats[i].l + '</button>';
