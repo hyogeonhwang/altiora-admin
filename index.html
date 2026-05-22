@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>알티오라 위례 · 행정 업무 가이드</title>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;background:#f4f6f4;color:#1a1a1a;font-size:14px}
@@ -97,6 +95,12 @@ body{font-family:-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;backgr
 .routine-task{color:#1a1a1a}
 .routine-target{color:#888;font-size:11px;margin-top:2px}
 /* Modal */
+#confirmOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+#confirmOverlay.show{display:flex}
+#confirm-box{background:#fff;border-radius:14px;padding:28px 32px;width:340px;max-width:90vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+#confirm-msg{font-size:13px;color:#555;line-height:1.7}
+.confirm-del-btn{padding:8px 24px;background:#A32D2D;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.confirm-del-btn:hover{background:#791F1F}
 #modalOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
 #modalOverlay.show{display:flex}
 #modal-box{background:#fff;border-radius:16px;padding:24px;width:520px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.15)}
@@ -139,6 +143,15 @@ body,html{min-height:100%}
 </div>
 
 <!-- Modal -->
+<div id="confirmOverlay">
+  <div id="confirm-box">
+    <div id="confirm-msg"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+      <button class="modal-cancel" onclick="closeConfirm()">취소</button>
+      <button class="confirm-del-btn" onclick="doConfirm()">삭제</button>
+    </div>
+  </div>
+</div>
 <div id="modalOverlay">
   <div id="modal-box">
     <div class="modal-title" id="modalTitle"></div>
@@ -161,8 +174,17 @@ var firebaseConfig = {
   messagingSenderId: "791679734419",
   appId: "1:791679734419:web:57945456c3f92cfb653366"
 };
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
+var db = null;
+var FIREBASE_OK = false;
+try {
+  if (typeof firebase !== "undefined") {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    FIREBASE_OK = true;
+  }
+} catch(e) {
+  console.warn("Firebase init failed:", e);
+}
 
 
 var DEF = {
@@ -303,12 +325,13 @@ payment:{
 },
 messages:{
   "키즈노트":[
-    {title:"유치부 · 신규생 첫등원 안내",tag:"키즈노트 알림장",tc:"teal",note:"담임 교사에게 내용 확인 후 발송. 연령별·담임별 내용 상이할 수 있음.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n[원생 영어이름]([원생 한국이름]) 학부모님,\n[입학일]부터 [반이름]반 가족이 되신 것을 진심으로 환영합니다!\n\n▶ 첫 등원 준비물\n• 실내화 (가방에 넣어서 지참)\n• 물통 (이름 기재)\n• [담임 교사 확인 후 추가 안내 사항]\n\n▶ 등원 시간: [등원 시간]\n▶ 하원 시간: [하원 시간]\n\n원에서 사용할 영어 이름과 현금영수증 발급 번호를 알림장 회신으로 보내주시면 감사하겠습니다.\n\n설레는 마음으로 기다리겠습니다 🌿\n알티오라 위례 드림"},
+    {title:"유치부 · 신규생 첫등원 안내",tag:"키즈노트 알림장",tc:"teal",note:"담임 교사 확인 후 발송. 반 이름·담임교사·등원일 수정 필수.",text:"[ 첫 등원 안내문 ]\n\n안녕하세요, 학부모님.\n첫 등원 관련 아래와 같이 안내드리니 확인 후 준비하시기 바랍니다.\n첫 등원일은 [등원일]입니다.\n\n감사합니다.\n\n# 반 이름 : [반 이름]\n# 담임교사 : [담임교사]\n\n*** 등원 준비물 :\n모든 물품에는 반드시 이름을 기재하여 주시기 바랍니다.\n\n■ 매일 가방에 가지고 등원합니다. ■\n✓숟가락, 젓가락 또는 포크\n✓개인 물통\n✓L자 파일(원에서 배부)\n\n■ 보내주시면 원에 두고 사용합니다. ■\n✓실내화(슬리퍼형 X)_ 매주 금요일 세척을 위해 실내화 주머니에 보내드립니다.\n✓필통(연필 7자루, 지우개 2개)\n✓칫솔, 치약, 가글 컵\n✓여벌 옷(티셔츠, 바지, 속옷, 양말)\n✓색연필, 사인펜 (12색)\n   (원에서 배부 예정인 색연필, 사인펜은 원에서 사용하므로 각 색깔별로 이름 스티커를 부착하여 보내주세요.)\n\n■ 복장 안내 ■\n* 원 복: 월요일, 목요일\n* 체육복: 화요일, 금요일\n* 자유복: 수요일\n\n기타 궁금한 사항이 있으시면 원으로 전화 또는 키즈노트 알림장으로 문의하시면 자세히 안내하겠습니다.\n\n감사합니다."},
     {title:"유치부 · 원복 사이즈 신청",tag:"키즈노트 알림장",tc:"teal",note:"대면 등록 시 원복 사이즈를 바로 선택한 경우 발송 불필요.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n원복 사이즈 신청 안내를 드립니다.\n\n▶ 원복 종류: 상의 / 하의 / 점퍼\n▶ 사이즈: 110 / 120 / 130 / 140\n▶ 신청 방법: 알림장 회신으로 사이즈 보내주세요.\n\n원복은 신청 후 [수령 예정일]에 배부해 드릴 예정입니다.\n\n감사합니다 🌿\n알티오라 위례 드림"},
-    {title:"팬그램/팬그램키즈 · 신규생 안내 (텍스트 보조용)",tag:"키즈노트 알림장",tc:"teal",note:"⚠️ 반별 이미지 안내문(jpg/png) 업로드가 원칙. PDF 불가. 이미지 불가 시 보조용.",text:"안녕하세요, 알티오라 팬그램입니다 😊\n\n[원생 영어이름]([원생 한국이름]) 학부모님, 환영합니다!\n[등원 시작일]부터 [반이름]반에서 함께합니다.\n\n▶ 등원 시간: [등원 시간]\n▶ 하원 시간: [하원 시간]\n▶ [담임 교사 확인 후 추가 안내]\n\n가방은 첫날 담임 선생님께서 직접 배부해 드립니다.\n\n감사합니다 🌿\n알티오라 팬그램 드림"},
-    {title:"페타무스 · 신규생 안내 (기본형)",tag:"키즈노트 알림장",tc:"teal",note:"⚠️ 반드시 Grace T.와 내용 cross-check 후 발송. Grace T. 확인 없이 단독 발송 금지.",text:"안녕하세요, Petamus International입니다 😊\n\n[원생 영어이름]([원생 한국이름]) 학부모님, 환영합니다!\n[등원 시작일]부터 [반이름]반에서 함께합니다.\n\n▶ 등원 준비물 및 일정\n[Grace T. 확인 후 내용 입력]\n\n▶ 등원 시간: [등원 시간]\n▶ 하원 시간: [하원 시간]\n\n감사합니다 🌿\nPetamus International 드림"},
+    {title:"팬그램/팬그램키즈 · 신입생 안내",tag:"키즈노트 알림장",tc:"teal",note:"반 이름·등원일·영어이름·현금영수증번호·수업시간 수정 필수.",text:"◆ [반 이름] 신입생 안내문 ◆\n\n안녕하세요, [학부모님] 어머님.\n첫 등원일은 [등원일]로 등원일에 가지고 올 준비물을 안내드립니다.\n\n문의사항 있으신 경우, 원으로 전화 또는 알림장으로 문의하시면 자세한 답변드리겠습니다.\n\n감사합니다.\n\n\n[ 확인 사항 ]\n1. 첫 등원일에 팬그램키즈 가방 배부 예정입니다.\n2. 실내화는 원에 두고 다닙니다. (이름 반드시 기재)\n3. 첫 등원일에 배부하는 교재도 원에 두고 다니고, 숙제 또는 대여 도서만 가지고 다닙니다.\n4. 원에서 사용할 영어 이름은 [영어이름]으로 확인하였습니다.\n5. 현금영수증 발급 번호는 [현금영수증번호]로 확인하였습니다.\n   *** 발급 번호 변경 시에만 원으로 말씀해 주시면 되고, 매월 계좌이체 또는 현금 납부 내역은 일괄 발급됩니다.\n   *** 이미 납부하신 비용에 대한 현금영수증은 [등원일] 첫 등원일에 일괄 발급 예정이니 참고하시기 바랍니다.\n6. 셔틀은 [탑승여부]으로 확인하였습니다.\n7. 수업 시간은 [수업시간]으로 [도착시간]까지 원에 도착하실 수 있도록 부탁드립니다.\n8. 키즈노트 반은 [이동예정일]에 배정 반([반 이름])으로 이동 예정입니다."},
+    {title:"페타무스 · 신입생 안내",tag:"키즈노트 알림장",tc:"teal",note:"⚠️ Grace T.와 cross-check 후 발송. 영어이름·현금영수증번호·등원일·반이름 수정 필수.",text:"안녕하세요, [학부모님] 어머님.\nPetamus 신입생 안내 드립니다.\n\n첫 등원일은 [등원일]입니다.\n\n문의사항 있으신 경우, 본원으로 전화 또는 알림장으로 문의하시면 자세한 답변 드리겠습니다.\n\n감사합니다.\n\n\n[ 확인 사항 ]\n1. 가방 및 교재 배부에 대해서는 오늘 오전에 담당 선생님께서 전화 안내 예정입니다.\n2. 원에서 사용할 영어 이름은 [영어이름]으로 확인하였습니다.\n3. 현금영수증 발급 번호는 [현금영수증번호]로 확인하였습니다.\n   *** 발급 번호 변경 시에만 원으로 말씀해 주시면 되고, 매월 계좌이체 또는 현금 납부 내역은 일괄 발급됩니다.\n   *** 이미 납부하신 비용에 대한 현금영수증은 [등원일] 첫 등원일에 일괄 발급 예정이니 참고하시기 바랍니다.\n4. 셔틀은 이용하지 않고, 개별 등 & 개별 하원으로 확인하였습니다.\n5. 키즈노트 알림장은 [이동예정일]에 배정 반([반 이름])으로 반 이동 예정입니다.\n\n감사합니다."},
     {title:"원공지 · 키즈아머 정기소독",tag:"키즈노트 원공지",tc:"blue",note:"소독일 전날 또는 당일 오전 업로드.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n정기 원내 소독 일정을 안내드립니다.\n\n▶ 소독 일시: [날짜] 오후 7시\n▶ 소독 업체: 키즈아머\n▶ 소독 범위: 원내 전체\n\n이용에 참고 부탁드립니다.\n감사합니다 🌿\n알티오라 위례 드림"},
-    {title:"원공지 · 휴원일 안내",tag:"키즈노트 원공지",tc:"blue",note:"원장님 요청 시 제작하여 공지.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n휴원 일정을 안내드립니다.\n\n▶ 휴원일: [날짜]\n▶ 재원일: [날짜]부터 정상 운영\n\n이용에 참고 부탁드립니다.\n감사합니다 🌿\n알티오라 위례 드림"}
+    {title:"원공지 · 휴원일 안내",tag:"키즈노트 원공지",tc:"blue",note:"원장님 요청 시 제작하여 공지.",text:"안녕하세요, 알티오라 위례입니다 😊\n\n휴원 일정을 안내드립니다.\n\n▶ 휴원일: [날짜]\n▶ 재원일: [날짜]부터 정상 운영\n\n이용에 참고 부탁드립니다.\n감사합니다 🌿\n알티오라 위례 드림"},
+    {title:"퇴원 안내 (키즈노트 알림장)",tag:"키즈노트 알림장 (개별)",tc:"red",note:"퇴원 확정 후 발송. 반납 도서 수·환불 내역 수정 필수.",text:"◆ 퇴원 및 도서 반납 안내 ◆\n\n안녕하세요, [원생이름] 어머님.\n[마지막등원일]이 [원생이름] 마지막 등원일로 말씀주셔서 퇴원 안내드립니다.\n\n내일 사용하던 교재 및 실내화는 담임 선생님께 생겨주실 예정이고, 키즈노트는 [퇴소처리일]에 퇴소처리 예정입니다.\n퇴소처리하면 이전 남긴 글들은 모두 주역 보기에서 열람하실 수 있으니 참고 바랍니다.\n\n환불일은 매주 금요일 내역 안내드리며, 키즈노트에 남겨주신 계좌로 [환불일]에 환불 송금하겠습니다.\n\n* [은행명] [계좌번호] [예금주] 님\n\n아직 반납하지 않은 도서가 [미반납권수]권 있는 것으로 확인되니 마지막 등원 시 꼭 도서 반납 부탁드립니다.\n(미반납 도서는 권당 10,000원씩 도서보증금에서 차감)\n\n그동안 알티오라 위례와 함께해 주셔서 진심으로 감사드리며, [원생이름]의 건강하고 밝은 성장을 진심으로 응원하겠습니다.\n\n감사합니다.\n\n■ 환불 내역 안내\n1. 도서보증금(모든 대여 도서 반납 시): [금액]원\n2. 잔여 수업비용(총 [회수]회): [금액]원\n3. 오후 돌봄 비용(총 [회수]회): [금액]원\n4. 셔틀비([해당월]분): [금액]원\n5. 교재비([해당월]분): [금액]원\n6. 재비([해당기간]): [금액]원\n[ 총 환불 금액: [총금액]원 ]\n\n※ 미반납 도서는 마지막 등원 시 꼭 가지고 올 수 있도록 가방에 넣어서 보내주시면 감사하겠습니다."}
   ],
   "교사방":[
     {title:"신규생 등원 공지 (완납 즉시)",tag:"전체교사방 (in English)",tc:"purple",note:"완납 확인 직후 즉시 발송. 첫 등원일 09:00에 재공지 (총 2회).",text:"Dear teachers,\n\nWe have a new student joining us.\n\n▶ Student: [English Name] ([Korean Name])\n▶ Class: [Class Name]\n▶ Start Date: [Date]\n\nPlease give them a warm welcome!\nThank you 😊"},
@@ -333,6 +356,10 @@ messages:{
     {title:"원복 결제 요청",tag:"4번 카톡방",tc:"amber",note:"스마트아이에서 주문 완료 후 발송.",text:"안녕하세요, 이사장님.\n원복 결제 요청 드립니다.\n\n▶ 주문 내역: [원복 종류 및 사이즈]\n▶ 결제 금액: [금액]원\n▶ 업체: 스마트아이\n\n이상입니다. 감사합니다 😊"}
   ]
 },
+quickfiles:[],
+memo:"",
+notes:{},
+notices:[],
 quickref:[
   {id:"pay",ic:"💳",ti:"수납 방법 & 계좌",rows:[
     {label:"월 교습비",text:"신용카드 결제 가능",url:""},
@@ -354,33 +381,19 @@ quickref:[
   ]},
   {id:"contact",ic:"📞",ti:"주요 연락처 & 업체",rows:[
     {label:"이엠북스",text:"김상현 차장 (카톡으로 결제 요청)",url:""},
-    {label:"원복 스마트아이",text:"",url:"https://altiora.firstmall.kr/intro/intro_main"},
-    {label:"팬그램 가방 세꼬마네꼬마",text:"ID: altiorawr / PW: altiora6632+",url:"https://m.secomanecoma.co.kr/"},
-    {label:"러닝앤코 (본사 교재)",text:"반품 처리 확인",url:"https://learningbox.biz/login_form.php?RedirectUrl=center_main.php"},
     {label:"키즈아머",text:"격월 금요일 오후 7시 정기소독",url:""},
     {label:"나이스파크 주차",text:"주차권 30개 이하 → 이사장님께 충전 요청 / 회차 20분",url:""}
-  ]},
-  {id:"files",ic:"📂",ti:"주요 파일 위치",rows:[
-    {label:"매일 사용",text:"공유파일 > 00관리자 > 05 전화상담 및 2026 신규생 명단",url:""},
-    {label:"수납 특이사항",text:"공유파일 > 00관리자 > 01 수납관련(중요) > 00 2026학년도 수납 특이사항",url:""},
-    {label:"납부 안내문",text:"공유파일 > 00관리자 > 10 행정 > 1. 납부안내문",url:""},
-    {label:"원복 재고",text:"공유파일 > 00관리자 > 03 원복 관련 > 원복 주문&재고 현황",url:""},
-    {label:"조직도/직원현황",text:"공유파일 > 00관리자 > 06 조직도_직원현황_2026",url:""},
-    {label:"반배정 테스트",text:"공유파일 > 00관리자 > 05 > 반배정 TEST 2026 (2번째 시트)",url:""},
-    {label:"교사 Timetable",text:"공유파일 > 05 Time Table > Schedule As of 2026 April",url:""},
-    {label:"방역(키즈아머)",text:"공유파일 > 00관리자 > 09 방역 (키즈아머, 2023년~)",url:""},
-    {label:"현금 시재",text:"공유파일 > 00관리자 > 06 정기등록차량 & 현금시재 관리",url:""}
   ]},
   {id:"sites",ic:"🔗",ti:"주요 사이트 & 계정",rows:[
     {label:"원복 스마트아이",text:"",url:"https://altiora.firstmall.kr/intro/intro_main"},
     {label:"팬그램 가방 세꼬마네꼬마",text:"ID: altiorawr / PW: altiora6632+",url:"https://m.secomanecoma.co.kr/"},
-    {label:"러닝앤코 (반품)",text:"Book order 메뉴",url:"https://learningbox.biz/login_form.php?RedirectUrl=center_main.php"},
+    {label:"러닝앤코 (반품 확인)",text:"Book order 메뉴",url:"https://learningbox.biz/login_form.php?RedirectUrl=center_main.php"},
     {label:"서머캠프 구글폼",text:"",url:"https://m.site.naver.com/25Kq1"},
     {label:"국민은행 인터넷뱅킹",text:"계좌: 045537-04-004674",url:"https://www.kbstar.com"},
     {label:"홈택스 (연말정산)",text:"외국인 교사 연말정산",url:"https://www.hometax.go.kr"},
     {label:"국세청 영문 안내",text:"원어민 교사용",url:"https://www.nts.go.kr/english/main.do"}
   ]},
-  {id:"shuttle",ic:"🚌",ti:"외부교사 주차 등록",rows:[
+  {id:"parking",ic:"🅿️",ti:"주차 관리",rows:[
     {label:"셔틀 담당",text:"바다 선생님",url:""},
     {label:"3호 차량 (매일)",text:"17:00 이후 지하주차장 등록 필수 — 737소5170",url:""},
     {label:"월 K-pop 교사",text:"63무4780 / 24오0238 (가끔)",url:""},
@@ -389,6 +402,12 @@ quickref:[
     {label:"목 뮤직티피코 Sarah",text:"319부9929",url:""},
     {label:"키즈티티·뮤직티피코 대표",text:"248더8859 (가끔)",url:""},
     {label:"주차 기준",text:"무료 회차 20분 / 방문 학부모·외부교사 전원 주차 할인 등록",url:""}
+  ]},
+  {id:"forms",ic:"📄",ti:"서식",rows:[
+    {label:"상담 기록 카드",text:"",url:""},
+    {label:"신규생 등록 카드",text:"",url:""},
+    {label:"입학 동의서",text:"",url:""},
+    {label:"퇴원 신청서",text:"",url:""}
   ]}
 ]
 };
@@ -422,7 +441,7 @@ var tagTc = {teal:"#0F6E56",blue:"#185FA5",amber:"#854F0B",red:"#A32D2D",purple:
 
 // ─── FIREBASE HELPERS ──────────────────────────────────────
 function fbSave(path, val) {
-  db.ref(path).set(val);
+  if (!S.offline && FIREBASE_OK && db) db.ref(path).set(val);
   render();
 }
 
@@ -449,21 +468,41 @@ function deepSet(obj, path, val) {
 function arrClone(v) { return JSON.parse(JSON.stringify(v || [])); }
 
 // ─── INIT ──────────────────────────────────────────────────
-function init() {
-  db.ref("/").once("value", function(snap) {
-    var val = snap.val();
-    if (!val || !val.routines) {
-      db.ref("/").set(DEF, function() {
-        S.d = JSON.parse(JSON.stringify(DEF));
-        S.loaded = true;
-        render();
-      });
-    } else {
-      S.d = val;
-      S.loaded = true;
-      render();
-    }
-  });
+function editOnlyBtn(act, ds) {
+  var attrs = "";
+  var keys = Object.keys(ds);
+  for (var i = 0; i < keys.length; i++) {
+    attrs += " data-" + keys[i] + '="' + escHtml(String(ds[keys[i]])) + '"';
+  }
+  return '<div class="edit-ctrl"><button class="eic" data-act="' + act + '"' + attrs + ' title="수정">✏️</button></div>';
+}
+
+function addNoticeInline() {
+  var input = document.getElementById("noticeInput");
+  var tag = document.getElementById("noticeTag");
+  if (!input || !input.value.trim()) return;
+  var arr = arrClone(S.d.notices || []);
+  arr.push({tag: tag ? tag.value : "공지", text: input.value.trim()});
+  S.d.notices = arr;
+  fbSave("notices", arr);
+  // clear input after save (render() will re-render but input ref is gone)
+}
+
+function delNoticeInline(ni) {
+  var arr = arrClone(S.d.notices || []);
+  arr.splice(ni, 1);
+  S.d.notices = arr;
+  fbSave("notices", arr);
+}
+
+function showOfflineBanner() {
+  var b = document.getElementById("editBanner");
+  if (!b) return;
+  b.style.display = "block";
+  b.style.background = "#FFF3CD";
+  b.style.borderColor = "#FFC107";
+  b.style.color = "#856404";
+  b.innerHTML = "⚠️ 오프라인 모드 — 수정사항이 저장되지 않습니다. GitHub Pages에 배포하면 Firebase와 자동 연동됩니다.";
 }
 
 // ─── RENDER ────────────────────────────────────────────────
@@ -568,11 +607,12 @@ function handleAction(act, ds) {
       fbSave("routines", rt);
     });
   } else if (act === "delRoutineTask") {
-    if (!confirm("이 업무를 삭제할까요?")) return;
-    var rt = arrClone(S.d.routines);
-    rt[idx].tasks.splice(idx2, 1);
-    S.d.routines = rt;
-    fbSave("routines", rt);
+    showConfirm("선택한 업무를 삭제할까요?", function() {
+      var rt = arrClone(S.d.routines);
+      rt[idx].tasks.splice(idx2, 1);
+      S.d.routines = rt;
+      fbSave("routines", rt);
+    });
   } else if (act === "editConsultChannel") {
     var ch = S.d.consult.channels[idx];
     openModal("채널 수정", [
@@ -586,11 +626,12 @@ function handleAction(act, ds) {
       fbSave("consult/channels", cc);
     });
   } else if (act === "delConsultChannel") {
-    if (!confirm("이 채널을 삭제할까요?")) return;
-    var cc = arrClone(S.d.consult.channels);
-    cc.splice(idx, 1);
-    S.d.consult.channels = cc;
-    fbSave("consult/channels", cc);
+    showConfirm("선택한 채널을 삭제할까요?", function() {
+      var cc = arrClone(S.d.consult.channels);
+      cc.splice(idx, 1);
+      S.d.consult.channels = cc;
+      fbSave("consult/channels", cc);
+    });
   } else if (act === "addConsultChannel") {
     openModal("채널 추가", [
       {id:"name", label:"채널명", type:"text", value:"", ph:"예: 인스타그램"},
@@ -611,12 +652,13 @@ function handleAction(act, ds) {
       fbSave("consult/" + fld, arr);
     });
   } else if (act === "delTestItem") {
-    if (!confirm("이 항목을 삭제할까요?")) return;
-    var fld = ds.fld;
-    var arr = arrClone(S.d.consult[fld]);
-    arr.splice(idx, 1);
-    S.d.consult[fld] = arr;
-    fbSave("consult/" + fld, arr);
+    showConfirm("선택한 항목을 삭제할까요?", function() {
+      var fld = ds.fld;
+      var arr = arrClone(S.d.consult[fld]);
+      arr.splice(idx, 1);
+      S.d.consult[fld] = arr;
+      fbSave("consult/" + fld, arr);
+    });
   } else if (act === "addTestItem") {
     var fld = ds.fld;
     openModal("항목 추가", [{id:"val", label:"내용", type:"text", value:"", ph:""}], function(v) {
@@ -629,26 +671,29 @@ function handleAction(act, ds) {
     var st = S.d.consult.testSteps[idx];
     openModal("단계 수정", [
       {id:"t", label:"내용", type:"text", value:st.t, ph:""},
-      {id:"c", label:"색상", type:"color", value:st.c}
+      {id:"c", label:"색상", type:"color", value:st.c},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:st.url||"", ph:"https://docs.google.com/..."}
     ], function(v) {
       var arr = arrClone(S.d.consult.testSteps);
-      arr[idx] = {t:v.t, c:v.c};
+      arr[idx] = {t:v.t, c:v.c, url:v.url};
       S.d.consult.testSteps = arr;
       fbSave("consult/testSteps", arr);
     });
   } else if (act === "delTestStep") {
-    if (!confirm("이 단계를 삭제할까요?")) return;
-    var arr = arrClone(S.d.consult.testSteps);
-    arr.splice(idx, 1);
-    S.d.consult.testSteps = arr;
-    fbSave("consult/testSteps", arr);
+    showConfirm("선택한 단계를 삭제할까요?", function() {
+      var arr = arrClone(S.d.consult.testSteps);
+      arr.splice(idx, 1);
+      S.d.consult.testSteps = arr;
+      fbSave("consult/testSteps", arr);
+    });
   } else if (act === "addTestStep") {
     openModal("단계 추가", [
       {id:"t", label:"내용", type:"text", value:"", ph:"단계 설명"},
-      {id:"c", label:"색상", type:"color", value:"teal"}
+      {id:"c", label:"색상", type:"color", value:"teal"},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:"", ph:"https://docs.google.com/..."}
     ], function(v) {
       var arr = arrClone(S.d.consult.testSteps);
-      arr.push({t:v.t, c:v.c});
+      arr.push({t:v.t, c:v.c, url:v.url});
       S.d.consult.testSteps = arr;
       fbSave("consult/testSteps", arr);
     });
@@ -659,29 +704,32 @@ function handleAction(act, ds) {
     openModal("단계 수정", [
       {id:"t", label:"단계명", type:"text", value:st.t, ph:""},
       {id:"d", label:"설명", type:"textarea", value:st.d||"", ph:""},
-      {id:"c", label:"색상", type:"color", value:st.c}
+      {id:"c", label:"색상", type:"color", value:st.c},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:st.url||"", ph:"https://docs.google.com/..."}
     ], function(v) {
-      steps[idx] = Object.assign(steps[idx], {t:v.t, d:v.d, c:v.c});
+      steps[idx] = Object.assign(steps[idx], {t:v.t, d:v.d, c:v.c, url:v.url});
       deepSet(S.d, src, steps);
       fbSave(src, steps);
     });
   } else if (act === "delStep") {
-    if (!confirm("이 단계를 삭제할까요?")) return;
-    var src = ds.src;
-    var steps = arrClone(deepGet(S.d, src));
-    steps.splice(idx, 1);
-    steps.forEach(function(s, i){ s.n = i+1; });
-    deepSet(S.d, src, steps);
-    fbSave(src, steps);
+    showConfirm("선택한 단계를 삭제할까요?", function() {
+      var src = ds.src;
+      var steps = arrClone(deepGet(S.d, src));
+      steps.splice(idx, 1);
+      steps.forEach(function(s, i){ s.n = i+1; });
+      deepSet(S.d, src, steps);
+      fbSave(src, steps);
+    });
   } else if (act === "addStep") {
     var src = ds.src;
     openModal("단계 추가", [
       {id:"t", label:"단계명", type:"text", value:"", ph:""},
       {id:"d", label:"설명", type:"textarea", value:"", ph:""},
-      {id:"c", label:"색상", type:"color", value:"teal"}
+      {id:"c", label:"색상", type:"color", value:"teal"},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:"", ph:"https://docs.google.com/..."}
     ], function(v) {
       var steps = arrClone(deepGet(S.d, src));
-      steps.push({n:steps.length+1, t:v.t, d:v.d, c:v.c});
+      steps.push({n:steps.length+1, t:v.t, d:v.d, c:v.c, url:v.url});
       deepSet(S.d, src, steps);
       fbSave(src, steps);
     });
@@ -695,12 +743,13 @@ function handleAction(act, ds) {
       fbSave("checklist/" + cat, cl);
     });
   } else if (act === "delClItem") {
-    if (!confirm("이 항목을 삭제할까요?")) return;
-    var cat = ds.cat, gi = parseInt(ds.gi), ii = parseInt(ds.ii);
-    var cl = arrClone(S.d.checklist[cat]);
-    cl[gi].items.splice(ii, 1);
-    S.d.checklist[cat] = cl;
-    fbSave("checklist/" + cat, cl);
+    showConfirm("선택한 항목을 삭제할까요?", function() {
+      var cat = ds.cat, gi = parseInt(ds.gi), ii = parseInt(ds.ii);
+      var cl = arrClone(S.d.checklist[cat]);
+      cl[gi].items.splice(ii, 1);
+      S.d.checklist[cat] = cl;
+      fbSave("checklist/" + cat, cl);
+    });
   } else if (act === "addClItem") {
     var cat = ds.cat, gi = parseInt(ds.gi);
     openModal("항목 추가", [{id:"v", label:"내용", type:"text", value:"", ph:"체크리스트 항목"}], function(v) {
@@ -719,12 +768,13 @@ function handleAction(act, ds) {
       fbSave("checklist/" + cat, cl);
     });
   } else if (act === "delClGroup") {
-    if (!confirm("이 그룹을 삭제할까요?")) return;
-    var cat = ds.cat, gi = parseInt(ds.gi);
-    var cl = arrClone(S.d.checklist[cat]);
-    cl.splice(gi, 1);
-    S.d.checklist[cat] = cl;
-    fbSave("checklist/" + cat, cl);
+    showConfirm("이 그룹 전체를 삭제할까요?<br>그룹 안의 모든 항목도 함께 삭제됩니다.", function() {
+      var cat = ds.cat, gi = parseInt(ds.gi);
+      var cl = arrClone(S.d.checklist[cat]);
+      cl.splice(gi, 1);
+      S.d.checklist[cat] = cl;
+      fbSave("checklist/" + cat, cl);
+    });
   } else if (act === "addClGroup") {
     var cat = ds.cat;
     openModal("그룹 추가", [{id:"g", label:"그룹명", type:"text", value:"", ph:"예: 교사 공지"}], function(v) {
@@ -747,12 +797,13 @@ function handleAction(act, ds) {
       fbSave("messages/" + cat, arr);
     });
   } else if (act === "delMsg") {
-    if (!confirm("이 템플릿을 삭제할까요?")) return;
-    var cat = ds.cat;
-    var arr = arrClone(S.d.messages[cat]);
-    arr.splice(idx, 1);
-    S.d.messages[cat] = arr;
-    fbSave("messages/" + cat, arr);
+    showConfirm("선택한 메시지 템플릿을 삭제할까요?", function() {
+      var cat = ds.cat;
+      var arr = arrClone(S.d.messages[cat]);
+      arr.splice(idx, 1);
+      S.d.messages[cat] = arr;
+      fbSave("messages/" + cat, arr);
+    });
   } else if (act === "addMsg") {
     var cat = ds.cat;
     openModal("템플릿 추가", [
@@ -780,12 +831,13 @@ function handleAction(act, ds) {
       fbSave("quickref", qr);
     });
   } else if (act === "delQRow") {
-    if (!confirm("이 항목을 삭제할까요?")) return;
-    var si = parseInt(ds.si), ri = parseInt(ds.ri);
-    var qr = arrClone(S.d.quickref);
-    qr[si].rows.splice(ri, 1);
-    S.d.quickref = qr;
-    fbSave("quickref", qr);
+    showConfirm("선택한 항목을 삭제할까요?", function() {
+      var si = parseInt(ds.si), ri = parseInt(ds.ri);
+      var qr = arrClone(S.d.quickref);
+      qr[si].rows.splice(ri, 1);
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
   } else if (act === "addQRow") {
     var si = parseInt(ds.si);
     openModal("항목 추가", [
@@ -812,12 +864,13 @@ function handleAction(act, ds) {
       fbSave("quickref", qr);
     });
   } else if (act === "delQSec") {
-    if (!confirm("이 섹션을 삭제할까요?")) return;
-    var si = parseInt(ds.si);
-    var qr = arrClone(S.d.quickref);
-    qr.splice(si, 1);
-    S.d.quickref = qr;
-    fbSave("quickref", qr);
+    showConfirm("이 섹션 전체를 삭제할까요?<br>섹션 안의 모든 항목도 함께 삭제됩니다.", function() {
+      var si = parseInt(ds.si);
+      var qr = arrClone(S.d.quickref);
+      qr.splice(si, 1);
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
   } else if (act === "addQSec") {
     openModal("섹션 추가", [
       {id:"ic", label:"아이콘 (이모지)", type:"text", value:"📋", ph:""},
@@ -835,35 +888,169 @@ function handleAction(act, ds) {
     openModal("단계 수정", [
       {id:"t", label:"단계명", type:"text", value:st.t, ph:""},
       {id:"d", label:"설명", type:"textarea", value:st.d||"", ph:""},
-      {id:"c", label:"색상", type:"color", value:st.c}
+      {id:"c", label:"색상", type:"color", value:st.c},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:st.url||"", ph:"https://docs.google.com/..."}
     ], function(v) {
-      arr[idx] = Object.assign(arr[idx], {t:v.t, d:v.d, c:v.c});
+      arr[idx] = Object.assign(arr[idx], {t:v.t, d:v.d, c:v.c, url:v.url});
       deepSet(S.d, src, arr);
       fbSave(src, arr);
     });
   } else if (act === "delPayStep") {
-    if (!confirm("이 단계를 삭제할까요?")) return;
-    var src = ds.src;
-    var arr = arrClone(deepGet(S.d, src));
-    arr.splice(idx, 1);
-    deepSet(S.d, src, arr);
-    fbSave(src, arr);
+    showConfirm("선택한 단계를 삭제할까요?", function() {
+      var src = ds.src;
+      var arr = arrClone(deepGet(S.d, src));
+      arr.splice(idx, 1);
+      deepSet(S.d, src, arr);
+      fbSave(src, arr);
+    });
   } else if (act === "addPayStep") {
     var src = ds.src;
     openModal("단계 추가", [
       {id:"t", label:"단계명", type:"text", value:"", ph:""},
       {id:"d", label:"설명", type:"textarea", value:"", ph:""},
-      {id:"c", label:"색상", type:"color", value:"teal"}
+      {id:"c", label:"색상", type:"color", value:"teal"},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:"", ph:"https://docs.google.com/..."}
     ], function(v) {
       var arr = arrClone(deepGet(S.d, src));
-      arr.push({t:v.t, d:v.d, c:v.c});
+      arr.push({t:v.t, d:v.d, c:v.c, url:v.url});
       deepSet(S.d, src, arr);
       fbSave(src, arr);
     });
+  } else if (act === "editQFile") {
+    var f = S.d.quickfiles[idx];
+    openModal("파일 수정", [
+      {id:"name", label:"파일명", type:"text", value:f.name||"", ph:"예: 신규생 명단"},
+      {id:"url", label:"구글드라이브 URL", type:"text", value:f.url||"", ph:"https://docs.google.com/..."}
+    ], function(v) {
+      var arr = arrClone(S.d.quickfiles);
+      arr[idx] = {name:v.name, url:v.url};
+      S.d.quickfiles = arr;
+      fbSave("quickfiles", arr);
+    });
+  } else if (act === "delQFile") {
+    showConfirm("선택한 파일 링크를 삭제할까요?", function() {
+      var arr = arrClone(S.d.quickfiles);
+      arr.splice(idx, 1);
+      S.d.quickfiles = arr;
+      fbSave("quickfiles", arr);
+    });
+  } else if (act === "addQFile") {
+    openModal("파일 추가", [
+      {id:"name", label:"파일명", type:"text", value:"", ph:"예: 신규생 명단"},
+      {id:"url", label:"구글드라이브 URL", type:"text", value:"", ph:"https://docs.google.com/..."}
+    ], function(v) {
+      var arr = arrClone(S.d.quickfiles || []);
+      arr.push({name:v.name, url:v.url});
+      S.d.quickfiles = arr;
+      fbSave("quickfiles", arr);
+    });
+  } else if (act === "editStep2") {
+    var cur = S.d.consult.step2text || "";
+    var curUrl = S.d.consult.step2url || "";
+    openModal("STEP 2 내용 수정", [
+      {id:"t", label:"내용", type:"text", value:cur, ph:""},
+      {id:"url", label:"파일 링크 URL (없으면 공란)", type:"text", value:curUrl, ph:"https://docs.google.com/..."}
+    ], function(v) {
+      S.d.consult.step2text = v.t;
+      S.d.consult.step2url = v.url;
+      db.ref("consult/step2text").set(v.t);
+      db.ref("consult/step2url").set(v.url);
+      render();
+    });
+  } else if (act === "editStep3Item") {
+    var si3 = parseInt(ds.si3);
+    var arr = S.d.consult.step3 || [{title:"유치부 / 페타무스 상담",desc:"→ 원장님께 안내",sty:"al-t"},{title:"팬그램 상담",desc:"→ 부원장님께 안내",sty:"al-b"}];
+    var cur3 = arr[si3] || {};
+    openModal("STEP 3 항목 수정", [
+      {id:"title", label:"제목", type:"text", value:cur3.title||"", ph:""},
+      {id:"desc", label:"내용", type:"text", value:cur3.desc||"", ph:""}
+    ], function(v) {
+      var a = arrClone(S.d.consult.step3 || arr);
+      a[si3] = Object.assign(a[si3]||{}, {title:v.title, desc:v.desc});
+      S.d.consult.step3 = a;
+      fbSave("consult/step3", a);
+    });
+  } else if (act === "editNote") {
+    var nk = ds.nk;
+    var cur = (S.d.notes||{})[nk] || "";
+    openModal("내용 수정", [
+      {id:"v", label:"내용", type:"textarea", value:cur, ph:""}
+    ], function(v) {
+      if (!S.d.notes) S.d.notes = {};
+      S.d.notes[nk] = v.v;
+      fbSave("notes/" + nk, v.v);
+    });
+  } else if (act === "editTestNote") {
+    var cur = (S.d.consult||{}).testNote || "유치부: 대면 상담 / 팬그램: 대면 또는 전화";
+    openModal("참고 문구 수정", [
+      {id:"v", label:"내용", type:"text", value:cur, ph:""}
+    ], function(v) {
+      S.d.consult.testNote = v.v;
+      fbSave("consult/testNote", v.v);
+    });
+  } else if (act === "editNotice") {
+    var ni = parseInt(ds.ni);
+    var cur = S.d.notices[ni] || {};
+    openModal("공지 수정", [
+      {id:"tag", label:"태그", type:"select", value:cur.tag||"공지", options:["공지","특이사항","주의"]},
+      {id:"text", label:"내용", type:"textarea", value:cur.text||"", ph:"공지 또는 특이사항 내용"}
+    ], function(v) {
+      var arr = arrClone(S.d.notices);
+      arr[ni] = {tag:v.tag, text:v.text};
+      S.d.notices = arr;
+      fbSave("notices", arr);
+    });
+  } else if (act === "delNotice") {
+    showConfirm("이 항목을 삭제할까요?", function() {
+      var ni = parseInt(ds.ni);
+      var arr = arrClone(S.d.notices);
+      arr.splice(ni, 1);
+      S.d.notices = arr;
+      fbSave("notices", arr);
+    });
+  } else if (act === "addNotice") {
+    openModal("공지 추가", [
+      {id:"tag", label:"태그", type:"select", value:"공지", options:["공지","특이사항","주의"]},
+      {id:"text", label:"내용", type:"textarea", value:"", ph:"공지 또는 특이사항 내용"}
+    ], function(v) {
+      var arr = arrClone(S.d.notices || []);
+      arr.push({tag:v.tag, text:v.text});
+      S.d.notices = arr;
+      fbSave("notices", arr);
+    });
+  } else if (act === "addFormsSec") {
+    var qr = arrClone(S.d.quickref || []);
+    var exists = false;
+    for (var qi = 0; qi < qr.length; qi++) { if (qr[qi].id === "forms") { exists = true; break; } }
+    if (exists) {
+      alert("서식 섹션이 이미 존재합니다.");
+    } else {
+      var formsSec = JSON.parse(JSON.stringify(DEF.quickref[DEF.quickref.length-1]));
+      qr.push(formsSec);
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    }
   }
 }
 
 // ─── MODAL ─────────────────────────────────────────────────
+var confirmCb = null;
+function showConfirm(msg, cb) {
+  confirmCb = cb;
+  document.getElementById("confirm-msg").innerHTML =
+    '<div style="font-size:28px;margin-bottom:12px">🗑️</div>' +
+    '<div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:8px">삭제 확인</div>' +
+    '<div style="font-size:13px;color:#666;line-height:1.7">' + msg + '</div>';
+  document.getElementById("confirmOverlay").classList.add("show");
+}
+function doConfirm() {
+  document.getElementById("confirmOverlay").classList.remove("show");
+  if (confirmCb) { var cb = confirmCb; confirmCb = null; cb(); }
+}
+function closeConfirm() {
+  document.getElementById("confirmOverlay").classList.remove("show");
+  confirmCb = null;
+}
 var modalCb = null;
 
 function openModal(title, fields, onSave) {
@@ -876,6 +1063,12 @@ function openModal(title, fields, onSave) {
       fhtml += '<input id="mf_' + f.id + '" type="text" value="' + escHtml(f.value || "") + '" placeholder="' + escHtml(f.ph || "") + '">';
     } else if (f.type === "textarea") {
       fhtml += '<textarea id="mf_' + f.id + '" placeholder="' + escHtml(f.ph || "") + '">' + escHtml(f.value || "") + '</textarea>';
+    } else if (f.type === "select") {
+      fhtml += '<select id="mf_' + f.id + '" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit">';
+      (f.options||[]).forEach(function(opt) {
+        fhtml += '<option value="' + escHtml(opt) + '"' + (f.value===opt?' selected':'') + '>' + escHtml(opt) + '</option>';
+      });
+      fhtml += '</select>';
     } else if (f.type === "color") {
       var colors = ["teal","blue","purple","amber","red","gray"];
       fhtml += '<div class="color-options" id="mf_' + f.id + '" data-val="' + (f.value||"teal") + '">';
@@ -927,7 +1120,7 @@ function closeModal() {
 }
 
 document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") closeModal();
+  if (e.key === "Escape") { closeModal(); closeConfirm(); }
 });
 
 // ─── HELPERS ───────────────────────────────────────────────
@@ -967,8 +1160,10 @@ function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm) {
     h += '<div class="sbody' + (sm ? " sm" : "") + '" style="border-left:3px solid ' + c.b + ';padding:' + pad + ';border-radius:' + br + 'px' + mb + '">';
     h += '<div style="display:flex;justify-content:space-between;align-items:flex-start">';
     h += '<div class="step-title">' + escHtml(s.t || s.title || "") + '</div>';
+    h += '<div style="display:flex;align-items:center;gap:6px">';
+    if (s.url) h += '<a href="' + escHtml(s.url) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#E1F5EE;color:#0F6E56;text-decoration:none;border:1px solid #5DCAA5;white-space:nowrap">📂 파일</a>';
     if (actEdit) h += ectrls(actEdit, actDel, dsStep);
-    h += '</div>';
+    h += '</div></div>';
     if (s.d || s.desc) h += '<div class="step-desc">' + escHtml(s.d || s.desc || "") + '</div>';
     h += '</div></div>';
   }
@@ -977,33 +1172,105 @@ function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm) {
   return h;
 }
 
+// ─── MEMO ─────────────────────────────────────────────────
+var memoTimer = null;
+function onMemoInput(val) {
+  S.d.memo = val;
+  clearTimeout(memoTimer);
+  memoTimer = setTimeout(function() {
+    if (!S.offline && db) { try { db.ref("memo").set(val); } catch(e){} }
+  }, 800);
+}
+
 // ─── HOME ──────────────────────────────────────────────────
 function rHome() {
+  var qf = S.d.quickfiles || [];
   var rt = S.d.routines || [];
-  var h = '<div class="stit">고정 업무</div>';
+  var memo = S.d.memo || "";
+  var notices = S.d.notices || [];
+  var ntag = {
+    "공지":   {bg:"#E6F1FB", tc:"#185FA5", b:"#85B7EB"},
+    "특이사항":{bg:"#FAEEDA", tc:"#854F0B", b:"#EF9F27"},
+    "주의":   {bg:"#FCEBEB", tc:"#A32D2D", b:"#f0a0a0"}
+  };
+  var h = "";
+
+  // ── 이번 주 특이사항 / 공지
+  h += '<div class="slbl" style="margin-bottom:10px">이번 주 특이사항 / 공지</div>';
+  if (notices.length > 0) {
+    h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">';
+    for (var ni = 0; ni < notices.length; ni++) {
+      var n = notices[ni];
+      var nt = ntag[n.tag] || ntag["공지"];
+      h += '<div style="background:' + nt.bg + ';border:1px solid ' + nt.b + ';border-radius:10px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px">';
+      h += '<span style="font-size:11px;font-weight:700;color:' + nt.tc + ';padding:2px 8px;background:rgba(255,255,255,.6);border:1px solid ' + nt.b + ';border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:1px">' + escHtml(n.tag||"공지") + '</span>';
+      h += '<span style="font-size:13px;color:#1a1a1a;flex:1;line-height:1.6">' + escHtml(n.text||"") + '</span>';
+      h += '<button onclick="delNoticeInline(' + ni + ')" style="flex-shrink:0;background:transparent;border:none;color:#bbb;cursor:pointer;font-size:16px;padding:0 2px;line-height:1" title="삭제">×</button>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  h += '<div style="background:#fff;border:1px solid #e4e4e4;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:20px">';
+  h += '<select id="noticeTag" style="padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;color:#555;flex-shrink:0">';
+  h += '<option value="공지">공지</option><option value="특이사항">특이사항</option><option value="주의">주의</option>';
+  h += '</select>';
+  h += '<input id="noticeInput" type="text" placeholder="공지 또는 특이사항 내용 입력..." onkeydown="if(event.key==\'Enter\')addNoticeInline()" style="flex:1;padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">';
+  h += '<button onclick="addNoticeInline()" style="padding:6px 16px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">추가</button>';
+  h += '</div>';
+
+  // ── 자주 쓰는 파일
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+  h += '<div class="slbl" style="margin:0">자주 쓰는 파일</div></div>';
+  if (qf.length === 0) {
+    h += '<div style="background:#f9f9f9;border:1.5px dashed #ddd;border-radius:10px;padding:22px;text-align:center;color:#bbb;font-size:13px;margin-bottom:6px">편집 모드에서 자주 쓰는 구글드라이브 파일을 추가해보세요</div>';
+  } else {
+    h += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px">';
+    for (var i = 0; i < qf.length; i++) {
+      var f = qf[i];
+      h += '<div style="background:#fff;border:1px solid #e4e4e4;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden">';
+      if (f.url) {
+        h += '<a href="' + escHtml(f.url) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex:1;min-width:0">';
+        h += '<span style="font-size:16px;flex-shrink:0">📄</span>';
+        h += '<span style="font-size:12px;color:#0F6E56;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(f.name) + '</span>';
+        h += '</a>';
+      } else {
+        h += '<span style="font-size:16px;flex-shrink:0">📄</span>';
+        h += '<span style="font-size:12px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(f.name || "파일명 없음") + '</span>';
+      }
+      h += ectrls("editQFile","delQFile",{idx:i});
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  h += addBtn("+ 파일 추가","addQFile",{});
+
+  // ── 고정 업무
+  h += '<div style="margin-top:22px;margin-bottom:10px" class="slbl">고정 업무</div>';
   h += '<div class="g3">';
   for (var pi = 0; pi < rt.length; pi++) {
     var p = rt[pi];
-    h += '<div class="routine-col">';
-    h += '<div class="routine-head" style="background:' + p.pcolor + ';border-bottom:1px solid ' + p.pborder + '">';
-    h += '<div style="display:flex;justify-content:space-between;align-items:center">';
-    h += '<span class="routine-period" style="color:' + p.ptc + '">' + escHtml(p.period) + '</span></div></div>';
-    h += '<div class="routine-body">';
     var tasks = p.tasks || [];
+    h += '<div class="routine-col"><div class="routine-head" style="background:' + p.pcolor + ';border-bottom:1px solid ' + p.pborder + '">';
+    h += '<span class="routine-period" style="color:' + p.ptc + '">' + escHtml(p.period) + '</span></div>';
+    h += '<div class="routine-body">';
     for (var ti = 0; ti < tasks.length; ti++) {
       var tk = tasks[ti];
-      h += '<div class="routine-item">';
-      h += '<div class="routine-item-content">';
+      h += '<div class="routine-item"><div class="routine-item-content">';
       h += '<div class="routine-task">' + escHtml(tk.task) + '</div>';
       if (tk.target) h += '<div class="routine-target">' + escHtml(tk.target) + '</div>';
-      h += '</div>';
-      h += ectrls("editRoutineTask", "delRoutineTask", {idx:pi, idx2:ti});
-      h += '</div>';
+      h += '</div>' + ectrls("editRoutineTask","delRoutineTask",{idx:pi,idx2:ti}) + '</div>';
     }
-    h += addBtn("+ 업무 추가", "addRoutineTask", {idx:pi});
+    h += addBtn("+ 업무 추가","addRoutineTask",{idx:pi});
     h += '</div></div>';
   }
   h += '</div>';
+
+  // ── 오늘의 메모
+  h += '<div style="margin-top:22px;margin-bottom:10px" class="slbl">오늘의 메모</div>';
+  h += '<div style="background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:14px">';
+  h += '<textarea id="memoArea" oninput="onMemoInput(this.value)" placeholder="오늘 처리할 일이나 특이사항을 자유롭게 적어두세요..." style="width:100%;height:110px;border:none;outline:none;font-size:13px;font-family:inherit;resize:none;color:#1a1a1a;background:transparent;line-height:1.8">' + escHtml(memo) + '</textarea>';
+  h += '<div style="font-size:11px;color:#ccc;text-align:right;margin-top:2px">자동 저장</div></div>';
+
   return h;
 }
 
@@ -1027,9 +1294,30 @@ function rConsult() {
   h += '</div>';
   h += addBtn("+ 채널 추가", "addConsultChannel", {});
   h += '<div class="arrdn">↓</div>';
-  h += '<div class="card" style="margin-bottom:10px"><div class="slbl">STEP 2 — 상담 기록</div><div style="font-size:13px">[05 전화상담 및 2026 신규생 명단] 파일에 <strong>날짜 / 채널 / 수신인</strong> 항목 모두 기입</div></div>';
+  var s2txt = (co.step2text) || "[05 전화상담 및 2026 신규생 명단] 파일에 날짜 / 채널 / 수신인 항목 모두 기입";
+  h += '<div class="card" style="margin-bottom:10px">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+  h += '<div class="slbl" style="margin:0">STEP 2 — 상담 기록</div>';
+  h += editOnlyBtn("editStep2",{});
+  h += '</div>';
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-top:6px">';
+  h += '<span style="font-size:13px">' + escHtml(s2txt) + '</span>';
+  if (co.step2url) h += '<a href="' + escHtml(co.step2url) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;background:#E1F5EE;color:#0F6E56;text-decoration:none;border:1px solid #5DCAA5;white-space:nowrap;flex-shrink:0">📂 파일 열기</a>';
+  else h += '<span class="edit-ctrl" style="font-size:11px;color:#bbb;padding:2px 8px;border:1px dashed #ddd;border-radius:20px">📂 링크 미설정</span>';
+  h += '</div></div>';
   h += '<div class="arrdn">↓</div>';
-  h += '<div class="card" style="margin-bottom:10px"><div class="slbl">STEP 3 — 행정방 공지</div><div class="g2"><div class="al al-t"><strong>유치부 / 페타무스 상담</strong><br>→ 원장님께 안내</div><div class="al al-b"><strong>팬그램 상담</strong><br>→ 부원장님께 안내</div></div></div>';
+  var s3arr = co.step3 || [{title:"유치부 / 페타무스 상담",desc:"→ 원장님께 안내",sty:"al-t"},{title:"팬그램 상담",desc:"→ 부원장님께 안내",sty:"al-b"}];
+  h += '<div class="card" style="margin-bottom:10px">';
+  h += '<div class="slbl">STEP 3 — 행정방 공지</div><div class="g2">';
+  for (var si3 = 0; si3 < s3arr.length; si3++) {
+    var s3i = s3arr[si3];
+    h += '<div class="al ' + (s3i.sty||"al-t") + '" style="position:relative">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+    h += '<strong>' + escHtml(s3i.title) + '</strong>';
+    h += editOnlyBtn("editStep3Item",{si3:si3});
+    h += '</div><div style="margin-top:4px">' + escHtml(s3i.desc) + '</div></div>';
+  }
+  h += '</div></div>';
   h += '<div class="arrdn">↓</div>';
   h += '<div class="card" style="margin-bottom:10px"><div class="slbl">STEP 4 — 반 배정 테스트 필요 여부</div><div class="g2">';
   h += '<div class="al al-a"><strong>⚠️ 테스트 필요</strong>';
@@ -1048,7 +1336,9 @@ function rConsult() {
     h += ectrls("editTestItem","delTestItem",{fld:"testNoReq",idx:i}) + '</li>';
   }
   h += '</ul>' + addBtn("+ 항목 추가","addTestItem",{fld:"testNoReq"});
-  if (co.testNote) h += '<div style="margin-top:8px;padding:4px 8px;background:#9FE1CB;border-radius:6px;font-size:11px">' + escHtml(co.testNote) + '</div>';
+  var tn = co.testNote || "유치부: 대면 상담 / 팬그램: 대면 또는 전화";
+  h += '<div style="margin-top:8px;padding:5px 10px;background:#9FE1CB;border-radius:6px;font-size:11px;display:flex;justify-content:space-between;align-items:center">';
+  h += '<span>' + escHtml(tn) + '</span>' + editOnlyBtn("editTestNote",{}) + '</div>';
   h += '</div></div></div>';
   h += '<div class="arrdn">↓</div>';
   h += '<div class="card"><div class="slbl">STEP 5 — 테스트 진행 절차</div>';
@@ -1068,10 +1358,23 @@ function rReg() {
   var src = "register/" + S.regProg;
   var steps = deepGet(S.d, src) || [];
   h += stepFlow(steps, "editStep", "delStep", "addStep", {src: src});
+  var notes = S.d.notes || {};
+  var payRule = notes.reg_pay || "월 교습비 → 신용카드 가능  |  기타 비용 첫달 → 계좌이체만  |  2달~ → 성남사랑상품권 chak 가능\n도서보증금 → 계좌이체/현금 (퇴원 시 전액 환불 / 분실 시 권당 10,000원 차감)";
   h += '<div style="height:14px"></div>';
-  h += '<div class="al al-a"><strong>💳 수납 규칙 요약</strong><br>월 교습비 → 신용카드 가능 &nbsp;|&nbsp; 기타 비용 첫달 → 계좌이체만 &nbsp;|&nbsp; 2달~ → 성남사랑상품권 chak 가능<br>도서보증금 → 계좌이체/현금 (퇴원 시 전액 환불 / 분실 시 권당 10,000원 차감)</div>';
-  if (S.regProg === "유치부") h += '<div style="height:12px"></div><div class="al al-b"><strong>📋 신입생 L파일 구성</strong><br>① 신입생 안내문 &nbsp;② 해당월 식단 &nbsp;③ 유치부 Calendar &nbsp;④ 셔틀 뱃지</div>';
-  if (S.regProg === "팬그램") h += '<div style="height:12px"></div><div class="al al-b"><strong>📋 신입생 L파일 구성</strong><br>① 신입생 안내문 &nbsp;② Calendar &nbsp;③ 셔틀 뱃지 &nbsp;④ Monthly Lesson Plan (담임 cross-check)</div>';
+  h += '<div class="al al-a" style="position:relative">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-start"><strong>💳 수납 규칙 요약</strong>' + editOnlyBtn("editNote",{nk:"reg_pay"}) + '</div>';
+  h += '<div style="margin-top:5px;font-size:12px;white-space:pre-line">' + escHtml(payRule) + '</div></div>';
+  if (S.regProg === "유치부" || S.regProg === "팬그램") {
+    var nk = "reg_note_" + S.regProg;
+    var nd = S.regProg === "유치부"
+      ? "📋 신입생 L파일 구성\n① 신입생 안내문  ② 해당월 식단  ③ 유치부 Calendar  ④ 셔틀 뱃지"
+      : "📋 신입생 L파일 구성\n① 신입생 안내문  ② Calendar  ③ 셔틀 뱃지  ④ Monthly Lesson Plan (담임 cross-check)";
+    var noteText = notes[nk] || nd;
+    h += '<div style="height:12px"></div>';
+    h += '<div class="al al-b" style="position:relative">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start"><strong>📋 안내</strong>' + editOnlyBtn("editNote",{nk:nk}) + '</div>';
+    h += '<div style="margin-top:5px;font-size:12px;white-space:pre-line">' + escHtml(noteText) + '</div></div>';
+  }
   return h;
 }
 
@@ -1142,7 +1445,11 @@ function rPay() {
     var steps = deepGet(S.d, src) || [];
     h += stepFlow(steps, "editPayStep","delPayStep","addPayStep",{src:src});
     if (S.payS === "환불")
-      h += '<div style="height:12px"></div><div class="al al-a"><strong>⚠️ 환불 요청일: 매주 금요일</strong><br>중간에 요청하지 않고 금요일에 모아서 한 번에 요청</div>';
+      var envNote = (S.d.notes||{}).pay_warn_환불 || "⚠️ 환불 요청일: 매주 금요일\n중간에 요청하지 않고 금요일에 모아서 한 번에 요청";
+    h += '<div style="height:12px"></div>';
+    h += '<div class="al al-a" style="position:relative">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start"><strong>참고</strong>' + editOnlyBtn("editNote",{nk:"pay_warn_환불"}) + '</div>';
+    h += '<div style="margin-top:5px;font-size:12px;white-space:pre-line">' + escHtml(envNote) + '</div></div>';
   }
   return h;
 }
@@ -1185,9 +1492,8 @@ function rQRef() {
   var qr = S.d.quickref || [];
   var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">';
   h += '<div class="stit" style="margin:0">빠른 참조</div>';
-  h += ectrls("","","") ; // placeholder - not used here
+  h += '<button class="edit-ctrl" data-act="addFormsSec" style="padding:5px 12px;font-size:11px;font-weight:600;border:1px solid #85B7EB;background:#E6F1FB;color:#185FA5;border-radius:6px;cursor:pointer;font-family:inherit">📄 서식 섹션 추가</button>';
   h += '</div>';
-  h = '<div class="stit">빠른 참조</div>';
   h += '<div style="display:flex;flex-direction:column;gap:6px">';
   for (var si = 0; si < qr.length; si++) {
     var sec = qr[si];
@@ -1205,8 +1511,13 @@ function rQRef() {
         h += '<div class="rrow" style="' + (ri === sec.rows.length-1 ? "border:none" : "") + '">';
         h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
         h += '<div class="rval">';
-        if (row.url) h += '<a href="' + escHtml(row.url) + '" target="_blank" rel="noopener" class="rlink">🔗 ' + escHtml(extractDomain(row.url)) + '</a>';
+        if (row.url) {
+          var isForm = sec.id === "forms";
+          var linkLabel = isForm ? "📂 열기 / 인쇄" : "🔗 " + extractDomain(row.url);
+          h += '<a href="' + escHtml(row.url) + '" target="_blank" rel="noopener" class="rlink" style="' + (isForm ? "background:#E6F1FB;color:#185FA5;border-color:#85B7EB" : "") + '">' + linkLabel + '</a>';
+        }
         if (row.text) h += '<span>' + escHtml(row.text) + '</span>';
+        if (!row.url && sec.id === "forms") h += '<span style="font-size:11px;color:#ccc;padding:2px 8px;border:1px dashed #ddd;border-radius:20px">📂 링크 미설정</span>';
         h += '</div>';
         h += ectrls("editQRow","delQRow",{si:si,ri:ri});
         h += '</div>';
@@ -1257,7 +1568,51 @@ function copyMsg(idx) {
 }
 
 // ─── START ─────────────────────────────────────────────────
-init();
+// ─── START ─────────────────────────────────────────────────
+// 기본 데이터 즉시 표시 (파일/로컬에서도 항상 동작)
+S.d = JSON.parse(JSON.stringify(DEF));
+S.loaded = true;
+S.offline = true;
+render();
+
+// Firebase 동적 로드 (백그라운드)
+function connectFirebase() {
+  try {
+    if (typeof firebase !== "undefined" && !firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CFG);
+    }
+    db = firebase.database();
+    FIREBASE_OK = true;
+    db.ref("/").once("value", function(snap) {
+      try {
+        var val = snap.val();
+        if (!val || !val.routines) {
+          db.ref("/").set(DEF);
+        } else {
+          S.d = val;
+          S.offline = false;
+          render();
+        }
+      } catch(e2) { console.warn("FB data err:", e2); }
+    }, function(err) { console.warn("FB read err:", err); });
+  } catch(e) { console.warn("FB connect err:", e); }
+}
+
+if (window.location.protocol !== "file:") {
+  var fbS1 = document.createElement("script");
+  fbS1.src = "https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js";
+  fbS1.onload = function() {
+    var fbS2 = document.createElement("script");
+    fbS2.src = "https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js";
+    fbS2.onload = connectFirebase;
+    fbS2.onerror = showOfflineBanner;
+    document.head.appendChild(fbS2);
+  };
+  fbS1.onerror = showOfflineBanner;
+  document.head.appendChild(fbS1);
+} else {
+  showOfflineBanner();
+}
 
 </script>
 </body>
