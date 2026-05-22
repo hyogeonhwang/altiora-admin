@@ -852,6 +852,7 @@ function handleAction(act, ds) {
       {id:"url", label:"링크 URL (없으면 공란)", type:"text", value:"", ph:"https://..."}
     ], function(v) {
       var qr = arrClone(S.d.quickref);
+      if (!qr[si].rows) qr[si].rows = [];
       qr[si].rows.push({label:v.label, text:v.text, url:v.url});
       S.d.quickref = qr;
       fbSave("quickref", qr);
@@ -1526,9 +1527,10 @@ function rQRef() {
     h += '</div></div>';
     if (S.openRef === sec.id) {
       h += '<div class="abody">';
-      for (var ri = 0; ri < sec.rows.length; ri++) {
-        var row = sec.rows[ri];
-        h += '<div class="rrow" style="' + (ri === sec.rows.length-1 ? "border:none" : "") + '">';
+      var secRows = sec.rows || [];
+      for (var ri = 0; ri < secRows.length; ri++) {
+        var row = secRows[ri];
+        h += '<div class="rrow" style="' + (ri === secRows.length-1 ? "border:none" : "") + '">';
         h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
         h += '<div class="rval">';
         if (row.url) {
