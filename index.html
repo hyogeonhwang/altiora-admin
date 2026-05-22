@@ -1582,20 +1582,45 @@ function connectFirebase() {
       firebase.initializeApp(FIREBASE_CFG);
     }
     db = firebase.database();
-    FIREBASE_OK = true;
     db.ref("/").once("value", function(snap) {
       try {
         var val = snap.val();
         if (!val || !val.routines) {
-          db.ref("/").set(DEF);
+          // 첫 실행 - DEF 저장 후 온라인으로 전환
+          db.ref("/").set(DEF, function() {
+            S.offline = false;
+            showOnlineBanner();
+            render();
+          });
         } else {
           S.d = val;
           S.offline = false;
+          showOnlineBanner();
           render();
         }
-      } catch(e2) { console.warn("FB data err:", e2); }
-    }, function(err) { console.warn("FB read err:", err); });
-  } catch(e) { console.warn("FB connect err:", e); }
+      } catch(e2) {
+        console.warn("FB data err:", e2);
+        showOfflineBanner();
+      }
+    }, function(err) {
+      console.warn("FB read err:", err);
+      showOfflineBanner();
+    });
+  } catch(e) {
+    console.warn("FB connect err:", e);
+    showOfflineBanner();
+  }
+}
+
+function showOnlineBanner() {
+  var b = document.getElementById("editBanner");
+  if (!b) return;
+  b.style.display = "block";
+  b.style.background = "#E1F5EE";
+  b.style.borderColor = "#5DCAA5";
+  b.style.color = "#0F6E56";
+  b.innerHTML = "✅ Firebase 연결됨 — 모든 수정사항이 자동 저장됩니다.";
+  setTimeout(function() { b.style.display = "none"; }, 3000);
 }
 
 if (window.location.protocol !== "file:") {
