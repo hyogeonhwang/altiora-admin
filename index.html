@@ -85,6 +85,24 @@ body{font-family:-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;backgr
 .add-btn{display:none;width:100%;padding:8px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:1px dashed #5DCAA5;border-radius:8px;cursor:pointer;text-align:center;font-family:inherit;margin-top:6px}
 .edit-mode .add-btn{display:block}
 .add-btn:hover{background:#9FE1CB}
+.drag-handle{display:none;cursor:grab;color:#bbb;font-size:16px;line-height:1;padding:0 4px;user-select:none;flex-shrink:0}
+.edit-mode .drag-handle{display:inline-flex;align-items:center}
+.drag-handle:hover{color:#0F6E56}
+.drag-handle:active{cursor:grabbing}
+.dragging{opacity:.45}
+/* 월드비전 후원 카드 */
+.wv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:10px}
+.wv-card{border:1px solid #e2e2e2;border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.wv-photo{width:100%;aspect-ratio:1/1;background:#F1EFE8;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+.wv-photo img{width:100%;height:100%;object-fit:cover}
+.wv-noph{color:#bbb;font-size:12px;text-align:center;line-height:1.5}
+.wv-info{padding:8px 10px}
+.wv-cls{font-size:11px;font-weight:700;color:#0F6E56;background:#E1F5EE;display:inline-block;padding:1px 7px;border-radius:10px;margin-bottom:3px}
+.wv-name{font-size:13px;font-weight:600;line-height:1.3}
+.wv-meta{font-size:11px;color:#777;margin-top:2px}
+.wv-since{font-size:10px;color:#aaa;margin-top:2px}
+.wv-edit{margin-top:6px}
+.wv-edit .edit-ctrl{justify-content:flex-end}
 /* Home routine columns */
 .routine-col{background:#fff;border-radius:12px;border:1px solid #e4e4e4;overflow:hidden}
 .routine-head{padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.08)}
@@ -395,7 +413,8 @@ quickref:[
     {label:"서머캠프 구글폼",text:"",url:"https://m.site.naver.com/25Kq1"},
     {label:"국민은행 인터넷뱅킹",text:"계좌: 045537-04-004674",url:"https://www.kbstar.com"},
     {label:"홈택스 (연말정산)",text:"외국인 교사 연말정산",url:"https://www.hometax.go.kr"},
-    {label:"국세청 영문 안내",text:"원어민 교사용",url:"https://www.nts.go.kr/english/main.do"}
+    {label:"국세청 영문 안내",text:"원어민 교사용",url:"https://www.nts.go.kr/english/main.do"},
+    {label:"월드비전 후원",url:"https://www.worldvision.or.kr",id:"alt51267",pw:"Altiora6655!!",memo:"후원번호 002642398 · 매년 1회 송금 · 아이별 월 3만원(24.11~1만원 인상) · 월드비전 02-2078-7000 후원동행팀 · 학원 등록폰 010-3135-0031"}
   ]},
   {id:"parking",ic:"🅿️",ti:"주차 관리",rows:[
     {label:"셔틀 담당",text:"바다 선생님",url:""},
@@ -412,6 +431,18 @@ quickref:[
     {label:"신규생 등록 카드",text:"",url:""},
     {label:"입학 동의서",text:"",url:""},
     {label:"퇴원 신청서",text:"",url:""}
+  ]},
+  {id:"worldvision",ic:"🌍",ti:"월드비전 후원 아동",cards:[
+    {cls:"Mare",country:"Bolivia",name:"Eitangabriel (에이딴 가브리엘)",age:"만7세",gender:"M",since:"2023 Oct",photo:""},
+    {cls:"Aqua",country:"Cambodia",name:"Minea (미니어)",age:"만8세",gender:"M",since:"2023 May",photo:""},
+    {cls:"Viento",country:"Senegal",name:"Samba (상바)",age:"만9세",gender:"M",since:"2025 Apr",photo:""},
+    {cls:"Arbor",country:"Bangladesh",name:"Afrina Sathi (아르피나 사티)",age:"만9세",gender:"F",since:"2023 May",photo:""},
+    {cls:"Flos",country:"Malawi",name:"Mike (마이크)",age:"만9세",gender:"M",since:"2023 May",photo:""},
+    {cls:"Flos",country:"Rwanda",name:"Sandrine (산드린)",age:"만9세",gender:"F",since:"2023 May",photo:""},
+    {cls:"Harvard",country:"DR Congo",name:"Francine (프랑신느)",age:"만10세",gender:"F",since:"2023 May",photo:""},
+    {cls:"Cambridge",country:"Philippines",name:"Hansana Saneli J (한사나 사넬리 J)",age:"만11세",gender:"F",since:"2024 May",photo:""},
+    {cls:"Cambridge",country:"El Salvador",name:"Jimenez Meybelin Abigail (히메니스 메이벨린 아비가일)",age:"만11세",gender:"F",since:"2024 Oct",photo:""},
+    {cls:"Oxford",country:"Zambia",name:"Shakapala John (샤카팔라 존)",age:"만15세",gender:"M",since:"2024 Oct",photo:""}
   ]}
 ]
 };
@@ -474,6 +505,83 @@ function deepSet(obj, path, val) {
 
 function arrClone(v) { return JSON.parse(JSON.stringify(v || [])); }
 
+// ─── 드래그 순서 변경 (범용) ───────────────────────────────
+// src: S.d 안의 배열 경로 (예: "consult/testSteps", "quickref", "messages/키즈노트")
+// renumber: step류처럼 항목에 n(번호)이 있으면 true → 이동 후 1부터 다시 매김
+var _dragSrc = null, _dragFrom = -1;
+
+function dragReorder(src, from, to, renumber) {
+  var arr = arrClone(deepGet(S.d, src));
+  if (!Array.isArray(arr)) return;
+  if (from < 0 || to < 0 || from >= arr.length || to >= arr.length || from === to) return;
+  var moved = arr.splice(from, 1)[0];
+  arr.splice(to, 0, moved);
+  if (renumber) arr.forEach(function(it, i){ if (it && typeof it === "object" && "n" in it) it.n = i + 1; });
+  deepSet(S.d, src, arr);
+  fbSave(src, arr);
+}
+
+// 드래그 핸들 HTML (편집 모드에서만 보임 — .drag-handle CSS로 제어)
+function dragHandle(src, idx, renumber) {
+  return '<span class="drag-handle" draggable="true"'
+    + ' data-dsrc="' + escHtml(src) + '" data-didx="' + idx + '"'
+    + ' data-drenum="' + (renumber ? "1" : "0") + '" title="드래그하여 순서 변경">⠿</span>';
+}
+
+// ─── 월드비전 후원 카드 ────────────────────────────────────
+function wvSection(){ return (S.d.quickref||[]).find(function(s){return s.id==="worldvision";}); }
+
+// 사진 선택 → 리사이즈(최대 400px) → base64 저장
+function wvPickPhoto(idx){
+  var inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = function(){
+    var file = inp.files && inp.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var max = 400, w = img.width, h = img.height;
+        if(w>h && w>max){ h = Math.round(h*max/w); w = max; }
+        else if(h>=w && h>max){ w = Math.round(w*max/h); h = max; }
+        var cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        var dataUrl = cv.toDataURL("image/jpeg", 0.78);
+        var sec = wvSection(); if(!sec || !sec.cards[idx]) return;
+        var cards = arrClone(sec.cards);
+        cards[idx].photo = dataUrl;
+        saveWvCards(cards);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
+
+function saveWvCards(cards){
+  var qr = arrClone(S.d.quickref);
+  var si = qr.findIndex(function(s){return s.id==="worldvision";});
+  if(si<0) return;
+  qr[si].cards = cards;
+  S.d.quickref = qr;
+  fbSave("quickref", qr);
+}
+
+function wvCardFields(c){
+  c = c || {};
+  return [
+    {id:"cls", label:"반", type:"text", value:c.cls||"", ph:"예: Mare"},
+    {id:"name", label:"이름", type:"text", value:c.name||"", ph:"현지명 (한글명)"},
+    {id:"country", label:"국가", type:"text", value:c.country||"", ph:"예: Bolivia"},
+    {id:"age", label:"나이", type:"text", value:c.age||"", ph:"예: 만9세"},
+    {id:"gender", label:"성별", type:"text", value:c.gender||"", ph:"M / F"},
+    {id:"since", label:"후원 시작", type:"text", value:c.since||"", ph:"예: 2023 May"}
+  ];
+}
+
 // ─── INIT ──────────────────────────────────────────────────
 function editOnlyBtn(act, ds) {
   var attrs = "";
@@ -519,7 +627,8 @@ var TABS = [
   {id:"consult", lbl:"📞 상담"},
   {id:"register",lbl:"✏️ 등록"},
   {id:"checklist",lbl:"✅ 체크리스트"},
-  {id:"payment", lbl:"💰 환불·결제"},
+  {id:"refund",  lbl:"💸 환불"},
+  {id:"purchase",lbl:"🛒 구매·반품"},
   {id:"messages",lbl:"📋 메시지"},
   {id:"quickref",lbl:"📌 빠른참조"}
 ];
@@ -563,7 +672,8 @@ function render() {
     else if (S.aTab === "consult")    c.innerHTML = rConsult();
     else if (S.aTab === "register")   c.innerHTML = rReg();
     else if (S.aTab === "checklist")  c.innerHTML = rCL();
-    else if (S.aTab === "payment")    c.innerHTML = rPay();
+    else if (S.aTab === "refund")     c.innerHTML = rRefund();
+    else if (S.aTab === "purchase")   c.innerHTML = rPurchase();
     else if (S.aTab === "messages")   c.innerHTML = rMsgs();
     else                              c.innerHTML = rQRef();
   } catch(e) {
@@ -574,6 +684,7 @@ function render() {
 
 // ─── EVENT DELEGATION ──────────────────────────────────────
 document.addEventListener("click", function(e) {
+  if (e.target.closest && e.target.closest(".drag-handle")) return; // 핸들 클릭은 무시 (펼침/접힘 방지)
   var el = e.target;
   while (el && el !== document) {
     var act = el.dataset.act;
@@ -591,6 +702,43 @@ document.addEventListener("click", function(e) {
     if (el.tagName === "A") return;
     el = el.parentElement;
   }
+});
+
+// ─── 드래그 순서 변경 이벤트 ───────────────────────────────
+document.addEventListener("dragstart", function(e){
+  var h = e.target.closest ? e.target.closest(".drag-handle") : null;
+  if (!h) return;
+  _dragSrc = h.dataset.dsrc;
+  _dragFrom = parseInt(h.dataset.didx);
+  e.dataTransfer.effectAllowed = "move";
+  try { e.dataTransfer.setData("text/plain", _dragFrom); } catch(err){}
+  // 드래그 중인 행 강조
+  var row = h.closest(".sitem, .rrow, .mc, .qsec-wrap, .chcard, li");
+  if (row) row.classList.add("dragging");
+});
+
+document.addEventListener("dragover", function(e){
+  if (_dragSrc === null) return;
+  var h = e.target.closest ? e.target.closest(".drag-handle") : null;
+  if (h && h.dataset.dsrc === _dragSrc) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }
+});
+
+document.addEventListener("drop", function(e){
+  if (_dragSrc === null) return;
+  var h = e.target.closest ? e.target.closest(".drag-handle") : null;
+  if (h && h.dataset.dsrc === _dragSrc) {
+    e.preventDefault();
+    var to = parseInt(h.dataset.didx);
+    var renum = h.dataset.drenum === "1";
+    var from = _dragFrom, src = _dragSrc;
+    _dragSrc = null; _dragFrom = -1;
+    dragReorder(src, from, to, renum);
+  }
+});
+
+document.addEventListener("dragend", function(){
+  _dragSrc = null; _dragFrom = -1;
+  document.querySelectorAll(".dragging").forEach(function(el){ el.classList.remove("dragging"); });
 });
 
 // ─── ACTION HANDLER ────────────────────────────────────────
@@ -829,6 +977,87 @@ function handleAction(act, ds) {
       arr.push({title:v.title, tag:v.tag, tc:"teal", note:v.note, text:v.text});
       S.d.messages[cat] = arr;
       fbSave("messages/" + cat, arr);
+    });
+  } else if (act === "editWvCard") {
+    var sec = wvSection(); if(!sec) return;
+    var c = sec.cards[idx];
+    openModal("후원 아동 수정", wvCardFields(c), function(v){
+      var cards = arrClone(sec.cards);
+      cards[idx] = Object.assign({}, cards[idx], v);
+      saveWvCards(cards);
+    });
+  } else if (act === "addWvCard") {
+    openModal("후원 아동 추가", wvCardFields(null), function(v){
+      var sec = wvSection(); if(!sec) return;
+      var cards = arrClone(sec.cards||[]);
+      v.photo = "";
+      cards.push(v);
+      saveWvCards(cards);
+    });
+  } else if (act === "delWvCard") {
+    showConfirm("이 후원 아동 카드를 삭제할까요?", function(){
+      var sec = wvSection(); if(!sec) return;
+      var cards = arrClone(sec.cards);
+      cards.splice(idx, 1);
+      saveWvCards(cards);
+    });
+  } else if (act === "editContact") {
+    var si = parseInt(ds.si), ri = parseInt(ds.ri);
+    var row = S.d.quickref[si].rows[ri];
+    openModal("거래처 수정", [
+      {id:"label", label:"거래처명", type:"text", value:row.label||"", ph:"예: 이엠북스"},
+      {id:"mgr", label:"담당자", type:"text", value:row.mgr||"", ph:"예: 김상현 차장"},
+      {id:"tel", label:"연락처", type:"text", value:row.tel||"", ph:"예: 010-0000-0000"},
+      {id:"memo", label:"메모", type:"textarea", value:row.memo||"", ph:"비고 (선택)"}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      qr[si].rows[ri] = Object.assign({}, qr[si].rows[ri], {label:v.label, mgr:v.mgr, tel:v.tel, memo:v.memo});
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "addContact") {
+    var si = parseInt(ds.si);
+    openModal("거래처 추가", [
+      {id:"label", label:"거래처명", type:"text", value:"", ph:"예: 이엠북스"},
+      {id:"mgr", label:"담당자", type:"text", value:"", ph:"예: 김상현 차장"},
+      {id:"tel", label:"연락처", type:"text", value:"", ph:"예: 010-0000-0000"},
+      {id:"memo", label:"메모", type:"textarea", value:"", ph:"비고 (선택)"}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      if (!qr[si].rows) qr[si].rows = [];
+      qr[si].rows.push({label:v.label, mgr:v.mgr, tel:v.tel, memo:v.memo});
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "editSite") {
+    var si = parseInt(ds.si), ri = parseInt(ds.ri);
+    var row = S.d.quickref[si].rows[ri];
+    openModal("사이트 수정", [
+      {id:"label", label:"업체명", type:"text", value:row.label||"", ph:"예: 원복 스마트아이"},
+      {id:"url", label:"사이트 링크", type:"text", value:row.url||"", ph:"https://..."},
+      {id:"id", label:"아이디", type:"text", value:row.id||"", ph:"로그인 ID"},
+      {id:"pw", label:"비밀번호", type:"text", value:row.pw||"", ph:"비밀번호"},
+      {id:"memo", label:"메모", type:"textarea", value:row.memo||"", ph:"비고 (선택)"}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      qr[si].rows[ri] = Object.assign({}, qr[si].rows[ri], {label:v.label, url:v.url, id:v.id, pw:v.pw, memo:v.memo});
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
+    });
+  } else if (act === "addSite") {
+    var si = parseInt(ds.si);
+    openModal("사이트 추가", [
+      {id:"label", label:"업체명", type:"text", value:"", ph:"예: 원복 스마트아이"},
+      {id:"url", label:"사이트 링크", type:"text", value:"", ph:"https://..."},
+      {id:"id", label:"아이디", type:"text", value:"", ph:"로그인 ID"},
+      {id:"pw", label:"비밀번호", type:"text", value:"", ph:"비밀번호"},
+      {id:"memo", label:"메모", type:"textarea", value:"", ph:"비고 (선택)"}
+    ], function(v) {
+      var qr = arrClone(S.d.quickref);
+      if (!qr[si].rows) qr[si].rows = [];
+      qr[si].rows.push({label:v.label, url:v.url, id:v.id, pw:v.pw, memo:v.memo});
+      S.d.quickref = qr;
+      fbSave("quickref", qr);
     });
   } else if (act === "editQRow") {
     var si = parseInt(ds.si), ri = parseInt(ds.ri);
@@ -1159,7 +1388,7 @@ function addBtn(label, actName, ds) {
   return '<button class="add-btn" data-act="' + actName + '"' + attrs + '>' + label + '</button>';
 }
 
-function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm) {
+function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm, dragSrc) {
   var h = '<div class="sflow">';
   for (var i = 0; i < steps.length; i++) {
     var s = steps[i], c = SC[s.c] || SC.gray;
@@ -1177,6 +1406,7 @@ function stepFlow(steps, actEdit, actDel, actAdd, dsBase, sm) {
     h += '<div style="display:flex;align-items:center;gap:6px">';
     if (s.url) h += '<a href="' + escHtml(s.url) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#E1F5EE;color:#0F6E56;text-decoration:none;border:1px solid #5DCAA5;white-space:nowrap">📂 파일</a>';
     if (actEdit) h += ectrls(actEdit, actDel, dsStep);
+    if (dragSrc) h += dragHandle(dragSrc, i, true);
     h += '</div></div>';
     if (s.d || s.desc) h += '<div class="step-desc">' + escHtml(s.d || s.desc || "") + '</div>';
     h += '</div></div>';
@@ -1370,7 +1600,7 @@ function rConsult() {
   h += '</div></div></div>';
   h += '<div class="arrdn">↓</div>';
   h += '<div class="card"><div class="slbl">STEP 5 — 테스트 진행 절차</div>';
-  h += stepFlow(co.testSteps||[], "editTestStep", "delTestStep", "addTestStep", {});
+  h += stepFlow(co.testSteps||[], "editTestStep", "delTestStep", "addTestStep", {}, false);
   h += '</div>';
   return h;
 }
@@ -1385,7 +1615,7 @@ function rReg() {
   h += '</div>';
   var src = "register/" + S.regProg;
   var steps = deepGet(S.d, src) || [];
-  h += stepFlow(steps, "editStep", "delStep", "addStep", {src: src});
+  h += stepFlow(steps, "editStep", "delStep", "addStep", {src: src}, false, src);
   var notes = S.d.notes || {};
   var payRule = notes.reg_pay || "월 교습비 → 신용카드 가능  |  기타 비용 첫달 → 계좌이체만  |  2달~ → 성남사랑상품권 chak 가능\n도서보증금 → 계좌이체/현금 (퇴원 시 전액 환불 / 분실 시 권당 10,000원 차감)";
   h += '<div style="height:14px"></div>';
@@ -1453,10 +1683,25 @@ function rCL() {
   return h;
 }
 
-// ─── PAYMENT ───────────────────────────────────────────────
-function rPay() {
-  var subs = ["환불","이엠북스","원복","교재반품"];
-  var h = '<div class="stit">환불 · 결제 요청</div><div class="segs">';
+// ─── 환불 ───────────────────────────────────────────────
+function rRefund() {
+  var h = '<div class="stit">환불 요청</div>';
+  var src = "payment/환불";
+  var steps = deepGet(S.d, src) || [];
+  h += stepFlow(steps, "editPayStep","delPayStep","addPayStep",{src:src}, false, src);
+  var envNote = (S.d.notes||{}).pay_warn_환불 || "⚠️ 환불 요청일: 매주 금요일\n중간에 요청하지 않고 금요일에 모아서 한 번에 요청";
+  h += '<div style="height:12px"></div>';
+  h += '<div class="al al-a" style="position:relative">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-start"><strong>참고</strong>' + editOnlyBtn("editNote",{nk:"pay_warn_환불"}) + '</div>';
+  h += '<div style="margin-top:5px;font-size:12px;white-space:pre-line">' + escHtml(envNote) + '</div></div>';
+  return h;
+}
+
+// ─── 구매 · 반품 ─────────────────────────────────────────
+function rPurchase() {
+  var subs = ["이엠북스","원복","교재반품"];
+  if (subs.indexOf(S.payS) < 0) S.payS = "이엠북스";
+  var h = '<div class="stit">구매 · 반품</div><div class="segs">';
   for (var i = 0; i < subs.length; i++)
     h += '<button class="seg' + (S.payS === subs[i] ? " active" : "") + '" data-pay="' + subs[i] + '">' + subs[i] + '</button>';
   h += '</div>';
@@ -1464,20 +1709,14 @@ function rPay() {
     var pr = S.d.payment.교재반품 || {lnc:[], emc:[]};
     h += '<div class="g2">';
     h += '<div><div class="slbl">알티오라 본사 교재 (러닝앤코)</div>';
-    h += stepFlow(pr.lnc||[], "editPayStep","delPayStep","addPayStep",{src:"payment/교재반품/lnc"}, true);
+    h += stepFlow(pr.lnc||[], "editPayStep","delPayStep","addPayStep",{src:"payment/교재반품/lnc"}, true, "payment/교재반품/lnc");
     h += '</div><div><div class="slbl">이엠북스 외부 교재</div>';
-    h += stepFlow(pr.emc||[], "editPayStep","delPayStep","addPayStep",{src:"payment/교재반품/emc"}, true);
+    h += stepFlow(pr.emc||[], "editPayStep","delPayStep","addPayStep",{src:"payment/교재반품/emc"}, true, "payment/교재반품/emc");
     h += '</div></div>';
   } else {
     var src = "payment/" + S.payS;
     var steps = deepGet(S.d, src) || [];
-    h += stepFlow(steps, "editPayStep","delPayStep","addPayStep",{src:src});
-    if (S.payS === "환불")
-      var envNote = (S.d.notes||{}).pay_warn_환불 || "⚠️ 환불 요청일: 매주 금요일\n중간에 요청하지 않고 금요일에 모아서 한 번에 요청";
-    h += '<div style="height:12px"></div>';
-    h += '<div class="al al-a" style="position:relative">';
-    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start"><strong>참고</strong>' + editOnlyBtn("editNote",{nk:"pay_warn_환불"}) + '</div>';
-    h += '<div style="margin-top:5px;font-size:12px;white-space:pre-line">' + escHtml(envNote) + '</div></div>';
+    h += stepFlow(steps, "editPayStep","delPayStep","addPayStep",{src:src}, false, src);
   }
   return h;
 }
@@ -1506,6 +1745,7 @@ function rMsgs() {
     h += '<span class="pill" style="background:' + (tagBg[m.tc]||"#eee") + ';color:' + (tagTc[m.tc]||"#555") + ';margin-top:3px;display:inline-block">' + escHtml(m.tag) + '</span></div>';
     h += '<div style="display:flex;gap:6px;align-items:center">';
     h += ectrls("editMsg","delMsg",{cat:S.msgCat,idx:i});
+    h += dragHandle("messages/" + S.msgCat, i, false);
     h += '<button class="cpybtn" data-cpy="' + i + '">📋 복사</button></div></div>';
     h += '<div class="mb"><div class="mtxt">' + hi + '</div>';
     if (m.note) h += '<div class="mnote">💡 ' + escHtml(m.note) + '</div>';
@@ -1525,33 +1765,96 @@ function rQRef() {
   h += '<div style="display:flex;flex-direction:column;gap:6px">';
   for (var si = 0; si < qr.length; si++) {
     var sec = qr[si];
-    h += '<div>';
+    h += '<div class="qsec-wrap">';
     h += '<div class="achdr" data-ref="' + escHtml(sec.id) + '">';
     h += '<div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600"><span>' + sec.ic + '</span><span>' + escHtml(sec.ti) + '</span></div>';
     h += '<div style="display:flex;align-items:center;gap:6px">';
     h += ectrls("editQSec","delQSec",{si:si});
+    h += dragHandle("quickref", si, false);
     h += '<span style="color:#bbb;font-size:16px">' + (S.openRef === sec.id ? "▲" : "▼") + '</span>';
     h += '</div></div>';
     if (S.openRef === sec.id) {
       h += '<div class="abody">';
+      if (sec.id === "worldvision") {
+        var cards = sec.cards || [];
+        h += '<div class="wv-grid">';
+        for (var wi = 0; wi < cards.length; wi++) {
+          var ch = cards[wi];
+          h += '<div class="wv-card">';
+          h += '<div class="wv-photo" onclick="wvPickPhoto(' + wi + ')" title="클릭하여 사진 변경">';
+          if (ch.photo) h += '<img src="' + ch.photo + '" alt="">';
+          else h += '<span class="wv-noph">📷<br>사진 추가</span>';
+          h += '</div>';
+          h += '<div class="wv-info">';
+          h += '<div class="wv-cls">' + escHtml(ch.cls) + '</div>';
+          h += '<div class="wv-name">' + escHtml(ch.name) + '</div>';
+          h += '<div class="wv-meta">' + escHtml(ch.country) + ' · ' + escHtml(ch.age) + ' ' + escHtml(ch.gender) + '</div>';
+          h += '<div class="wv-since">후원 ' + escHtml(ch.since) + '~</div>';
+          h += '<div class="wv-edit">' + ectrls("editWvCard","delWvCard",{idx:wi}) + '</div>';
+          h += '</div></div>';
+        }
+        h += '</div>';
+        h += addBtn("+ 아동 추가","addWvCard",{});
+        h += '</div>'; // abody 닫기
+        h += '</div>'; // qsec-wrap 닫기
+        continue;
+      }
       var secRows = sec.rows || [];
       for (var ri = 0; ri < secRows.length; ri++) {
         var row = secRows[ri];
-        h += '<div class="rrow" style="' + (ri === secRows.length-1 ? "border:none" : "") + '">';
-        h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
-        h += '<div class="rval">';
-        if (row.url) {
-          var isForm = sec.id === "forms";
-          var linkLabel = isForm ? "📂 열기 / 인쇄" : "🔗 " + extractDomain(row.url);
-          h += '<a href="' + escHtml(row.url) + '" target="_blank" rel="noopener" class="rlink" style="' + (isForm ? "background:#E6F1FB;color:#185FA5;border-color:#85B7EB" : "") + '">' + linkLabel + '</a>';
+        var lastB = (ri === secRows.length-1 ? "border:none" : "");
+        if (sec.id === "contact") {
+          // 거래처명 / 담당자 / 연락처 / 메모
+          h += '<div class="rrow" style="' + lastB + '">';
+          h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
+          h += '<div class="rval" style="flex-direction:column;align-items:flex-start;gap:2px">';
+          var cline = [];
+          if (row.mgr) cline.push('담당: ' + escHtml(row.mgr));
+          if (row.tel) cline.push('☎ ' + escHtml(row.tel));
+          if (cline.length) h += '<span>' + cline.join('&nbsp;&nbsp;|&nbsp;&nbsp;') + '</span>';
+          if (row.text) h += '<span style="color:#888">' + escHtml(row.text) + '</span>';
+          if (row.memo) h += '<span style="font-size:11px;color:#aaa">📝 ' + escHtml(row.memo) + '</span>';
+          h += '</div>';
+          h += ectrls("editContact","delQRow",{si:si,ri:ri});
+          h += dragHandle("quickref/" + si + "/rows", ri, false);
+          h += '</div>';
+        } else if (sec.id === "sites") {
+          // 업체 / 사이트링크 / 아이디 / 비번 / 메모
+          h += '<div class="rrow" style="' + lastB + '">';
+          h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
+          h += '<div class="rval" style="flex-direction:column;align-items:flex-start;gap:3px">';
+          if (row.url) h += '<a href="' + escHtml(row.url) + '" target="_blank" rel="noopener" class="rlink">🔗 ' + extractDomain(row.url) + '</a>';
+          var acc = [];
+          if (row.id) acc.push('ID: ' + escHtml(row.id));
+          if (row.pw) acc.push('PW: ' + escHtml(row.pw));
+          if (acc.length) h += '<span style="font-family:monospace;font-size:12px">' + acc.join('&nbsp;&nbsp;/&nbsp;&nbsp;') + '</span>';
+          if (row.text) h += '<span style="color:#888">' + escHtml(row.text) + '</span>';
+          if (row.memo) h += '<span style="font-size:11px;color:#aaa">📝 ' + escHtml(row.memo) + '</span>';
+          h += '</div>';
+          h += ectrls("editSite","delQRow",{si:si,ri:ri});
+          h += dragHandle("quickref/" + si + "/rows", ri, false);
+          h += '</div>';
+        } else {
+          h += '<div class="rrow" style="' + lastB + '">';
+          h += '<div class="rlbl">' + escHtml(row.label) + '</div>';
+          h += '<div class="rval">';
+          if (row.url) {
+            var isForm = sec.id === "forms";
+            var linkLabel = isForm ? "📂 열기 / 인쇄" : "🔗 " + extractDomain(row.url);
+            h += '<a href="' + escHtml(row.url) + '" target="_blank" rel="noopener" class="rlink" style="' + (isForm ? "background:#E6F1FB;color:#185FA5;border-color:#85B7EB" : "") + '">' + linkLabel + '</a>';
+          }
+          if (row.text) h += '<span>' + escHtml(row.text) + '</span>';
+          if (!row.url && sec.id === "forms") h += '<span style="font-size:11px;color:#ccc;padding:2px 8px;border:1px dashed #ddd;border-radius:20px">📂 링크 미설정</span>';
+          h += '</div>';
+          h += ectrls("editQRow","delQRow",{si:si,ri:ri});
+          h += dragHandle("quickref/" + si + "/rows", ri, false);
+          h += '</div>';
         }
-        if (row.text) h += '<span>' + escHtml(row.text) + '</span>';
-        if (!row.url && sec.id === "forms") h += '<span style="font-size:11px;color:#ccc;padding:2px 8px;border:1px dashed #ddd;border-radius:20px">📂 링크 미설정</span>';
-        h += '</div>';
-        h += ectrls("editQRow","delQRow",{si:si,ri:ri});
-        h += '</div>';
       }
-      h += addBtn("+ 항목 추가","addQRow",{si:si});
+      // 섹션별 추가 버튼 분기
+      if (sec.id === "contact")      h += addBtn("+ 거래처 추가","addContact",{si:si});
+      else if (sec.id === "sites")   h += addBtn("+ 사이트 추가","addSite",{si:si});
+      else                           h += addBtn("+ 항목 추가","addQRow",{si:si});
       h += '</div>';
     }
     h += '</div>';
@@ -1599,9 +1902,47 @@ function copyMsg(idx) {
 // ─── START ─────────────────────────────────────────────────
 // ─── START ─────────────────────────────────────────────────
 // 기본 데이터 즉시 표시 (파일/로컬에서도 항상 동작)
+// 기존 데이터에 월드비전 섹션이 없으면 추가, 구버전(rows형)이면 카드형으로 교체
+function migrateWorldVision(d) {
+  if (!d || !Array.isArray(d.quickref)) return false;
+  var def = DEF.quickref.find(function(s){ return s.id === "worldvision"; });
+  if (!def) return false;
+  var existing = d.quickref.find(function(s){ return s.id === "worldvision"; });
+  if (!existing) {
+    d.quickref.push(JSON.parse(JSON.stringify(def)));
+    migrateWvAccount(d);
+    return true;
+  }
+  // 구버전(cards 없이 rows만) → 카드형으로 교체
+  if (!existing.cards) {
+    existing.ti = def.ti; existing.ic = def.ic;
+    existing.cards = JSON.parse(JSON.stringify(def.cards));
+    delete existing.rows;
+    migrateWvAccount(d);
+    return true;
+  }
+  // 제목이 옛 버전이면 갱신
+  var titleChanged = false;
+  if (existing.ti !== def.ti) { existing.ti = def.ti; titleChanged = true; }
+  var acc = migrateWvAccount(d);
+  return titleChanged || acc;
+}
+
+// sites 섹션에 월드비전 후원 계정 행이 없으면 추가
+function migrateWvAccount(d) {
+  var sites = (d.quickref||[]).find(function(s){ return s.id === "sites"; });
+  if (!sites || !Array.isArray(sites.rows)) return false;
+  if (sites.rows.some(function(r){ return r.label === "월드비전 후원"; })) return false;
+  var defSites = DEF.quickref.find(function(s){ return s.id === "sites"; });
+  var wvRow = defSites && defSites.rows.find(function(r){ return r.label === "월드비전 후원"; });
+  if (wvRow) { sites.rows.push(JSON.parse(JSON.stringify(wvRow))); return true; }
+  return false;
+}
+
 var _ls = null;
 try { var _r = localStorage.getItem("altiora_admin_data"); if(_r) _ls = JSON.parse(_r); } catch(e) {}
 S.d = _ls || JSON.parse(JSON.stringify(DEF));
+migrateWorldVision(S.d);
 S.loaded = true;
 S.offline = true;
 render();
@@ -1626,8 +1967,12 @@ function connectFirebase() {
         } else {
           S.d = val;
           S.offline = false;
+          // 월드비전 섹션이 없으면 추가하고 Firebase에 반영
+          if (migrateWorldVision(S.d)) {
+            try { db.ref("quickref").set(S.d.quickref); } catch(e3) {}
+          }
           // Firebase 데이터로 localStorage도 업데이트
-          try { localStorage.setItem("altiora_admin_data", JSON.stringify(val)); } catch(e) {}
+          try { localStorage.setItem("altiora_admin_data", JSON.stringify(S.d)); } catch(e) {}
           showOnlineBanner();
           render();
         }
