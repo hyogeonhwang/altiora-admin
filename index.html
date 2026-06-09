@@ -84,6 +84,7 @@ body{font-family:-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;backgr
 .eic.del:hover{background:#FCEBEB;border-color:#f0a0a0;color:#A32D2D}
 .add-btn{display:none;width:100%;padding:8px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:1px dashed #5DCAA5;border-radius:8px;cursor:pointer;text-align:center;font-family:inherit;margin-top:6px}
 .edit-mode .add-btn{display:block}
+.edit-mode .add-btn-inline{display:inline-block!important}
 .add-btn:hover{background:#9FE1CB}
 .drag-handle{display:none;cursor:grab;color:#bbb;font-size:16px;line-height:1;padding:0 4px;user-select:none;flex-shrink:0}
 .edit-mode .drag-handle{display:inline-flex;align-items:center}
@@ -1159,6 +1160,30 @@ function handleAction(act, ds) {
       deepSet(S.d, src, arr);
       fbSave(src, arr);
     });
+  } else if (act === "addPaySeg") {
+    openModal("구매·반품 항목 추가", [
+      {id:"name", label:"항목명", type:"text", value:"", ph:"예: 비품 구매"}
+    ], function(v) {
+      var name = (v.name||"").trim();
+      if (!name) { alert("항목명을 입력하세요."); return; }
+      if (S.d.payment[name]) { alert("이미 같은 이름의 항목이 있습니다."); return; }
+      S.d.payment[name] = []; // 새 항목은 빈 단계 배열
+      S.payS = name;
+      fbSave("payment/" + name, []);
+    });
+  } else if (act === "delPaySeg") {
+    var seg = ds.seg;
+    var segCount = Object.keys(S.d.payment || {}).filter(function(k){ return k !== "환불"; }).length;
+    if (segCount <= 1) { alert("마지막 항목은 삭제할 수 없습니다."); return; }
+    showConfirm('"' + seg + '" 항목을 삭제할까요? 안의 모든 단계가 함께 삭제됩니다.', function() {
+      delete S.d.payment[seg];
+      if (S.payS === seg) {
+        var remain = Object.keys(S.d.payment).filter(function(k){ return k !== "환불"; });
+        S.payS = remain[0] || "";
+      }
+      // payment 전체를 다시 저장 (키 삭제 반영)
+      fbSave("payment", S.d.payment);
+    });
   } else if (act === "editQFile") {
     var f = S.d.quickfiles[idx];
     openModal("파일 수정", [
@@ -1699,11 +1724,18 @@ function rRefund() {
 
 // ─── 구매 · 반품 ─────────────────────────────────────────
 function rPurchase() {
-  var subs = ["이엠북스","원복","교재반품"];
-  if (subs.indexOf(S.payS) < 0) S.payS = "이엠북스";
+  // payment 객체의 키에서 세그먼트 동적 생성 (환불은 별도 탭이라 제외)
+  var subs = Object.keys(S.d.payment || {}).filter(function(k){ return k !== "환불"; });
+  if (!subs.length) subs = ["이엠북스"];
+  if (subs.indexOf(S.payS) < 0) S.payS = subs[0];
   var h = '<div class="stit">구매 · 반품</div><div class="segs">';
-  for (var i = 0; i < subs.length; i++)
-    h += '<button class="seg' + (S.payS === subs[i] ? " active" : "") + '" data-pay="' + subs[i] + '">' + subs[i] + '</button>';
+  for (var i = 0; i < subs.length; i++) {
+    h += '<span class="seg-wrap" style="display:inline-flex;align-items:center;">';
+    h += '<button class="seg' + (S.payS === subs[i] ? " active" : "") + '" data-pay="' + escHtml(subs[i]) + '">' + escHtml(subs[i]) + '</button>';
+    h += '<button class="seg-del edit-ctrl" data-act="delPaySeg" data-seg="' + escHtml(subs[i]) + '" title="이 항목 삭제" style="border:none;background:none;color:#c0392b;cursor:pointer;font-size:13px;margin-left:-4px;margin-right:4px;">✕</button>';
+    h += '</span>';
+  }
+  h += '<button class="seg add-btn-inline edit-ctrl" data-act="addPaySeg" style="display:none;border:1px dashed #5DCAA5;color:#0F6E56;background:#E1F5EE;">+ 항목 추가</button>';
   h += '</div>';
   if (S.payS === "교재반품") {
     var pr = S.d.payment.교재반품 || {lnc:[], emc:[]};
