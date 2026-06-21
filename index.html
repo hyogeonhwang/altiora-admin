@@ -1466,37 +1466,7 @@ function clearMemo() {
 function rHome() {
   var qf = S.d.quickfiles || [];
   var rt = S.d.routines || [];
-  var memo = S.d.memo || "";
-  var notices = S.d.notices || [];
-  var ntag = {
-    "공지":   {bg:"#E6F1FB", tc:"#185FA5", b:"#85B7EB"},
-    "특이사항":{bg:"#FAEEDA", tc:"#854F0B", b:"#EF9F27"},
-    "주의":   {bg:"#FCEBEB", tc:"#A32D2D", b:"#f0a0a0"}
-  };
   var h = "";
-
-  // ── 이번 주 특이사항 / 공지
-  h += '<div class="slbl" style="margin-bottom:10px">이번 주 특이사항 / 공지</div>';
-  if (notices.length > 0) {
-    h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">';
-    for (var ni = 0; ni < notices.length; ni++) {
-      var n = notices[ni];
-      var nt = ntag[n.tag] || ntag["공지"];
-      h += '<div style="background:' + nt.bg + ';border:1px solid ' + nt.b + ';border-radius:10px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px">';
-      h += '<span style="font-size:11px;font-weight:700;color:' + nt.tc + ';padding:2px 8px;background:rgba(255,255,255,.6);border:1px solid ' + nt.b + ';border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:1px">' + escHtml(n.tag||"공지") + '</span>';
-      h += '<span style="font-size:13px;color:#1a1a1a;flex:1;line-height:1.6">' + escHtml(n.text||"") + '</span>';
-      h += '<button onclick="delNoticeInline(' + ni + ')" style="flex-shrink:0;background:rgba(0,0,0,.06);border:none;color:#888;cursor:pointer;font-size:13px;padding:2px 8px;border-radius:6px;line-height:1;font-weight:600" title="삭제">×</button>';
-      h += '</div>';
-    }
-    h += '</div>';
-  }
-  h += '<div style="background:#fff;border:1px solid #e4e4e4;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:20px">';
-  h += '<select id="noticeTag" style="padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;color:#555;flex-shrink:0">';
-  h += '<option value="공지">공지</option><option value="특이사항">특이사항</option><option value="주의">주의</option>';
-  h += '</select>';
-  h += '<input id="noticeInput" type="text" placeholder="공지 또는 특이사항 내용 입력..." onkeydown="if(event.key==\'Enter\')addNoticeInline()" style="flex:1;padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none">';
-  h += '<button onclick="addNoticeInline()" style="padding:6px 16px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">추가</button>';
-  h += '</div>';
 
   // ── 자주 쓰는 파일
   h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
@@ -1544,15 +1514,6 @@ function rHome() {
     h += '</div></div>';
   }
   h += '</div>';
-
-  // ── 오늘의 메모
-  h += '<div style="margin-top:22px;margin-bottom:10px" class="slbl">오늘의 메모</div>';
-  h += '<div style="background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:14px">';
-  h += '<textarea id="memoArea" placeholder="오늘 처리할 일이나 특이사항을 자유롭게 적어두세요..." style="width:100%;height:110px;border:none;outline:none;font-size:13px;font-family:inherit;resize:none;color:#1a1a1a;background:transparent;line-height:1.8">' + escHtml(memo) + '</textarea>';
-  h += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">';
-  h += '<button onclick="clearMemo()" style="padding:6px 16px;font-size:12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#888;cursor:pointer;font-family:inherit">🗑 삭제</button>';
-  h += '<button onclick="saveMemo()" style="padding:6px 16px;font-size:12px;border:none;border-radius:8px;background:#1D9E75;color:#fff;cursor:pointer;font-family:inherit;font-weight:600">💾 저장</button>';
-  h += '</div></div>';
 
   return h;
 }
